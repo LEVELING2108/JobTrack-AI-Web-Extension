@@ -1,0 +1,64 @@
+# Dependencies & Package Managers
+node_modules/
+.pnp
+.pnp.js
+package-lock.json.log
+yarn-error.log*
+npm-debug.log*
+pnpm-debug.log*
+
+# Build Outputs
+dist/
+dist-ssr/
+build/
+out/
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+*.env
+!*.env.example
+
+# IDEs and Editors
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.classpath
+.project
+.settings/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+
+# Temporary doc extracts and scratch
+extracted_docs/
+scratch/
+tmp/
+temp/
+
+# Coverage and test output
+coverage/
+.nyc_output/
+*.lcov
