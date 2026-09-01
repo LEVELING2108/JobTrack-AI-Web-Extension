@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "JobTrack - AI-Powered Job Application Tracker",
+  "version": "1.0.0",
+  "description": "Capture, organize, and track job postings from LinkedIn, Indeed, Glassdoor, and career websites.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "notifications"
+  ],
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "JobTrack"
+  },
+  "background": {
+    "service_worker": "assets/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "assets/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
