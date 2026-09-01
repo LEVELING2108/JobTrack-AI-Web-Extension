@@ -62,3 +62,8 @@ temp/
 coverage/
 .nyc_output/
 *.lcov
+
+# Local specification documents
+*.docx
+*.doc
+*.pdf
