@@ -1,4 +1,5 @@
 import { ExtractedJobData, JobExtractor } from './types';
+import { normalizeJobUrl } from '../../utils/urlNormalizer';
 
 /**
  * Dedicated extractor for Glassdoor job postings.
@@ -10,24 +11,56 @@ export class GlassdoorExtractor implements JobExtractor {
 
   extract(): ExtractedJobData | null {
     try {
-      const title = document.querySelector('.JobDetails_jobTitle__Rw5m5, [data-test="job-title"]')?.textContent?.trim();
-      const company = document.querySelector('.EmployerProfile_employerName__ZdBFt, [data-test="employer-name"]')?.textContent?.trim();
-      const location = document.querySelector('.JobDetails_location__mSg5h, [data-test="location"]')?.textContent?.trim();
+      const titleSelectors = [
+        '.JobDetails_jobTitle__Rw5m5',
+        '[data-test="job-title"]',
+        'h1.heading_Heading__6qRt5',
+        '.job-title',
+      ];
+      const title = this.queryText(titleSelectors);
+
+      const companySelectors = [
+        '.EmployerProfile_employerName__ZdBFt',
+        '[data-test="employer-name"]',
+        '.employer-name',
+        '.job-search-key-16z3s6e',
+      ];
+      const company = this.queryText(companySelectors);
 
       if (!title || !company) {
         return null;
       }
 
+      const location = this.queryText([
+        '.JobDetails_location__mSg5h',
+        '[data-test="location"]',
+        '.location',
+      ]);
+
+      const description = this.queryText(['.JobDetails_jobDescription__uWgah', '#JobDescriptionContainer'], 4000);
+
       return {
         title,
         company,
         location: location || undefined,
-        url: window.location.href,
+        url: normalizeJobUrl(window.location.href),
+        description: description || undefined,
         source: 'GLASSDOOR',
         extractedAt: new Date().toISOString(),
       };
     } catch {
       return null;
     }
+  }
+
+  private queryText(selectors: string[], maxLength?: number): string {
+    for (const selector of selectors) {
+      const el = document.querySelector(selector);
+      if (el && el.textContent) {
+        const cleaned = el.textContent.trim().replace(/\s+/g, ' ');
+        return maxLength ? cleaned.substring(0, maxLength) : cleaned;
+      }
+    }
+    return '';
   }
 }
