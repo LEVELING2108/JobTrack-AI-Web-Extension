@@ -26,6 +26,13 @@ export type ExperienceLevel =
   | 'EXECUTIVE'
   | 'NOT_SPECIFIED';
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
 export interface ExtractedJobData {
   title: string;
   company: string;
@@ -46,4 +53,15 @@ export interface ExtractedJobData {
 export interface JobExtractor {
   canHandle(url: string): boolean;
   extract(): Promise<ExtractedJobData | null> | ExtractedJobData | null;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+  };
+  timestamp?: string;
 }
