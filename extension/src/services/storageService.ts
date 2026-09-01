@@ -82,4 +82,14 @@ export const storageService = {
     const raw = localStorage.getItem(USER_PREFS_KEY);
     return raw ? JSON.parse(raw) : {};
   },
+
+  async setPreferences(prefs: Record<string, any>): Promise<void> {
+    const current = await this.getPreferences();
+    const updated = { ...current, ...prefs };
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      await chrome.storage.local.set({ [USER_PREFS_KEY]: updated });
+    } else {
+      localStorage.setItem(USER_PREFS_KEY, JSON.stringify(updated));
+    }
+  },
 };
