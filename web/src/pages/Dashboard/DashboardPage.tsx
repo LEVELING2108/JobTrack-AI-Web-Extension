@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useApplicationSummaryQuery } from '../../hooks/useApplications';
 import { ApplicationsTable } from '../../components/applications/ApplicationsTable';
+import RemindersWidget from '../../components/reminders/RemindersWidget';
 
 export default function DashboardPage() {
   const { data: summary, isLoading: summaryLoading } = useApplicationSummaryQuery();
@@ -60,31 +61,39 @@ export default function DashboardPage() {
         })}
       </div>
 
-      <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-xl p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
-            <TrendingUp className="w-6 h-6 text-indigo-100" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-xl p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
+                <TrendingUp className="w-6 h-6 text-indigo-100" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm">Interview Response Rate: {responseRate}%</h3>
+                <p className="text-xs text-indigo-100 mt-0.5">
+                  {interviews} interviews and {offers} offers from {total} tracked job applications.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-white/20 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1">
+                Active Funnel <ArrowUpRight className="w-4 h-4" />
+              </span>
+            </div>
           </div>
-          <div>
-            <h3 className="font-bold text-sm">Interview Response Rate: {responseRate}%</h3>
-            <p className="text-xs text-indigo-100 mt-0.5">
-              {interviews} interviews and {offers} offers from {total} tracked job applications.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs bg-white/20 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1">
-            Active Funnel <ArrowUpRight className="w-4 h-4" />
-          </span>
-        </div>
-      </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900">Recent Applications</h2>
-          <span className="text-xs text-slate-400">Live synchronized</span>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900">Recent Applications</h2>
+              <span className="text-xs text-slate-400">Live synchronized</span>
+            </div>
+            <ApplicationsTable />
+          </div>
         </div>
-        <ApplicationsTable />
+
+        <div className="space-y-6">
+          <RemindersWidget />
+        </div>
       </div>
     </div>
   );

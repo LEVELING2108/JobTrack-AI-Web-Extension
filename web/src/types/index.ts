@@ -70,6 +70,17 @@ export interface Interview {
   createdAt: string;
 }
 
+export interface Reminder {
+  id: number;
+  userId: number;
+  applicationId?: number;
+  title: string;
+  description?: string;
+  reminderTime: string;
+  completed: boolean;
+  createdAt: string;
+}
+
 export interface Application {
   id: number;
   userId: number;
@@ -143,4 +154,20 @@ export interface CreateApplicationPayload {
   deadline?: string;
   followUpDate?: string;
   notes?: string;
+}
+
+export interface CreateInterviewPayload {
+  applicationId: number;
+  roundName: string;
+  scheduledAt: string;
+  interviewer?: string;
+  meetingUrl?: string;
+  notes?: string;
+}
+
+export interface CreateReminderPayload {
+  applicationId?: number;
+  title: string;
+  description?: string;
+  reminderTime: string;
 }
