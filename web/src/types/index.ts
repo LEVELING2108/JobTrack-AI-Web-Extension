@@ -26,6 +26,14 @@ export type ExperienceLevel =
   | 'EXECUTIVE'
   | 'NOT_SPECIFIED';
 
+export type JobSource =
+  | 'LINKEDIN'
+  | 'INDEED'
+  | 'GLASSDOOR'
+  | 'COMPANY_WEBSITE'
+  | 'GENERIC'
+  | 'OTHER';
+
 export interface User {
   id: number;
   name: string;
@@ -45,9 +53,20 @@ export interface Job {
   currency?: string;
   employmentType?: EmploymentType;
   experienceLevel?: ExperienceLevel;
-  source: string;
+  source: JobSource | string;
   sourceJobId?: string;
   postedDate?: string;
+  createdAt: string;
+}
+
+export interface Interview {
+  id: number;
+  applicationId: number;
+  roundName: string;
+  scheduledAt: string;
+  interviewer?: string;
+  meetingUrl?: string;
+  notes?: string;
   createdAt: string;
 }
 
@@ -60,8 +79,30 @@ export interface Application {
   deadline?: string;
   followUpDate?: string;
   notes?: string;
+  interviews?: Interview[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ApplicationSummary {
+  total: number;
+  saved: number;
+  applied: number;
+  screening: number;
+  interview: number;
+  offer: number;
+  accepted: number;
+  rejected: number;
+  withdrawn: number;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }
 
 export interface ApiResponse<T> {
@@ -72,5 +113,34 @@ export interface ApiResponse<T> {
     code: string;
     message: string;
   };
-  timestamp: string;
+  timestamp?: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user: User;
+}
+
+export interface CreateApplicationPayload {
+  job: {
+    title: string;
+    company: string;
+    location?: string;
+    url: string;
+    description?: string;
+    salaryMin?: number;
+    salaryMax?: number;
+    currency?: string;
+    employmentType?: EmploymentType;
+    experienceLevel?: ExperienceLevel;
+    source: JobSource | string;
+  };
+  status: ApplicationStatus;
+  appliedDate?: string;
+  deadline?: string;
+  followUpDate?: string;
+  notes?: string;
 }
