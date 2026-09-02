@@ -133,6 +133,30 @@ export interface AnalyticsOverview {
   weeklyVelocity: VelocityMetric[];
 }
 
+export interface AiMatchScoreResult {
+  matchScore: number;
+  summary: string;
+  matchingSkills: string[];
+  missingSkills: string[];
+  recommendations: string[];
+}
+
+export interface AiCoverLetterResult {
+  coverLetter: string;
+}
+
+export interface AiInterviewPrepItem {
+  question: string;
+  category: string;
+  tip: string;
+  suggestedAnswerStrategy: string;
+}
+
+export interface AiInterviewPrepResult {
+  questions: AiInterviewPrepItem[];
+  keyThemes: string[];
+}
+
 export interface PageResponse<T> {
   content: T[];
   page: number;

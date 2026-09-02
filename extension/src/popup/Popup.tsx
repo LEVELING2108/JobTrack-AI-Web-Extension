@@ -17,6 +17,7 @@ import {
   LogOut,
   RefreshCw,
   AlertTriangle,
+  Sparkles,
 } from 'lucide-react';
 import { ExtractedJobData, ApplicationStatus, User } from '../types';
 import { storageService } from '../services/storageService';
@@ -50,6 +51,11 @@ export default function Popup() {
   const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
   const [syncing, setSyncing] = useState<boolean>(false);
 
+  // AI Match states
+  const [calculatingMatch, setCalculatingMatch] = useState<boolean>(false);
+  const [aiMatchScore, setAiMatchScore] = useState<number | null>(null);
+  const [aiMatchSummary, setAiMatchSummary] = useState<string>('');
+
   // Edit fields
   const [editTitle, setEditTitle] = useState<string>('');
   const [editCompany, setEditCompany] = useState<string>('');
@@ -62,7 +68,6 @@ export default function Popup() {
     apiService.getCurrentUser().then((user) => {
       setCurrentUser(user);
       if (user) {
-        // Trigger background sync for any queued jobs
         syncService.syncPendingJobs().then((res) => {
           if (res.syncedCount > 0) {
             storageService.getPendingJobs().then((jobs) => setPendingCount(jobs.length));
@@ -156,6 +161,24 @@ export default function Popup() {
     setSyncing(false);
   };
 
+  const handleCheckAiMatch = async () => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
+    setCalculatingMatch(true);
+    const title = editTitle || jobData?.title || '';
+    const comp = editCompany || jobData?.company || '';
+    const desc = jobData?.description || title;
+
+    const res = await apiService.calculateMatchScore(title, comp, desc);
+    setCalculatingMatch(false);
+    if (res) {
+      setAiMatchScore(res.matchScore);
+      setAiMatchSummary(res.summary);
+    }
+  };
+
   const handleSave = async () => {
     if (!jobData && !editTitle) return;
 
@@ -179,7 +202,6 @@ export default function Popup() {
     };
 
     if (currentUser && !isOffline) {
-      // Direct API Save
       const result = await apiService.saveApplication(finalJobData, status, notes);
       setSaving(false);
 
@@ -189,14 +211,12 @@ export default function Popup() {
       } else if (result.isDuplicate) {
         setIsDuplicate(true);
       } else {
-        // Fallback to queue if network failed
         await storageService.addPendingJob(finalJobData, status, notes);
         const updated = await storageService.getPendingJobs();
         setPendingCount(updated.length);
         setErrorMessage(result.error || 'Saved to offline queue.');
       }
     } else {
-      // Offline / Unauthenticated save to local storage
       await storageService.addPendingJob(finalJobData, status, notes);
       const updated = await storageService.getPendingJobs();
       setPendingCount(updated.length);
@@ -367,7 +387,7 @@ export default function Popup() {
         </div>
       )}
 
-      {/* Main Body (when not showing auth modal) */}
+      {/* Main Body */}
       {!showAuthModal && (
         <>
           {loading ? (
@@ -426,6 +446,34 @@ export default function Popup() {
                     {isEditing ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                   </button>
                 </div>
+              </div>
+
+              {/* AI Match Score Card */}
+              <div className="p-2.5 bg-purple-50/80 border border-purple-200 rounded-lg flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="bg-purple-600 text-white p-1 rounded">
+                    <Sparkles className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    {aiMatchScore !== null ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-extrabold text-purple-900 text-xs">{aiMatchScore}% Match</span>
+                        <span className="text-[10px] text-purple-700 line-clamp-1 max-w-[170px]">{aiMatchSummary}</span>
+                      </div>
+                    ) : (
+                      <span className="font-semibold text-purple-900 text-[11px]">AI Resume Match Score</span>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleCheckAiMatch}
+                  disabled={calculatingMatch}
+                  className="px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-semibold rounded shadow-2xs transition disabled:opacity-50 flex items-center gap-1 shrink-0"
+                >
+                  {calculatingMatch ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                  {aiMatchScore !== null ? 'Re-calculate' : 'Analyze Fit'}
+                </button>
               </div>
 
               {/* Collapsible Edit Drawer */}
@@ -557,7 +605,6 @@ export default function Popup() {
               </button>
             </div>
           ) : (
-            /* Empty State */
             <div className="py-8 text-center flex flex-col items-center justify-center gap-3">
               <div className="p-3 bg-slate-100 rounded-full text-slate-400">
                 <AlertCircle className="w-6 h-6" />
