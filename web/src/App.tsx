@@ -1,56 +1,56 @@
-import { Briefcase, LayoutDashboard, CheckCircle } from 'lucide-react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/common/ProtectedRoute';
+import DashboardLayout from './layouts/DashboardLayout';
+import LoginPage from './pages/Auth/LoginPage';
+import RegisterPage from './pages/Auth/RegisterPage';
+import DashboardPage from './pages/Dashboard/DashboardPage';
+import KanbanPage from './pages/Kanban/KanbanPage';
+import ApplicationsPage from './pages/Applications/ApplicationsPage';
+import InterviewsPage from './pages/Interviews/InterviewsPage';
+import AnalyticsPage from './pages/Analytics/AnalyticsPage';
+import SettingsPage from './pages/Settings/SettingsPage';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2,
+      retry: 1,
+    },
+  },
+});
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-brand-600 text-white p-2 rounded-lg">
-            <Briefcase className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 leading-tight">JobTrack</h1>
-            <p className="text-xs text-slate-500">AI-Powered Job Application Tracker</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <CheckCircle className="w-3.5 h-3.5" /> Web Dashboard Ready
-          </span>
-        </div>
-      </header>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-            <LayoutDashboard className="w-6 h-6 text-brand-600" />
-            <h2 className="text-lg font-semibold text-slate-800">Welcome to JobTrack Dashboard</h2>
-          </div>
-          <p className="text-slate-600 mb-6 text-sm">
-            Phase 1 Project Scaffolding successfully initialized. The full Kanban pipeline, job details view,
-            and application statistics will be connected in Phase 6.
-          </p>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="kanban" element={<KanbanPage />} />
+              <Route path="applications" element={<ApplicationsPage />} />
+              <Route path="interviews" element={<InterviewsPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-              <span className="text-xs font-medium text-slate-500">Total Saved</span>
-              <p className="text-2xl font-bold text-slate-800 mt-1">0</p>
-            </div>
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <span className="text-xs font-medium text-blue-600">Applied</span>
-              <p className="text-2xl font-bold text-blue-900 mt-1">0</p>
-            </div>
-            <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-              <span className="text-xs font-medium text-purple-600">Interviews</span>
-              <p className="text-2xl font-bold text-purple-900 mt-1">0</p>
-            </div>
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <span className="text-xs font-medium text-emerald-600">Offers</span>
-              <p className="text-2xl font-bold text-emerald-900 mt-1">0</p>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
