@@ -107,6 +107,32 @@ export interface ApplicationSummary {
   withdrawn: number;
 }
 
+export interface SourceMetric {
+  source: string;
+  totalCount: number;
+  interviewCount: number;
+  offerCount: number;
+  conversionRate: number;
+}
+
+export interface VelocityMetric {
+  weekLabel: string;
+  count: number;
+}
+
+export interface AnalyticsOverview {
+  totalApplications: number;
+  activeApplications: number;
+  responseRate: number;
+  interviewRate: number;
+  offerRate: number;
+  averageSalaryMin?: number;
+  averageSalaryMax?: number;
+  stageCounts: Record<ApplicationStatus, number>;
+  sourceBreakdown: SourceMetric[];
+  weeklyVelocity: VelocityMetric[];
+}
+
 export interface PageResponse<T> {
   content: T[];
   page: number;
