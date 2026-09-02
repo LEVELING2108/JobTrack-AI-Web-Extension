@@ -140,4 +140,29 @@ export const apiService = {
       };
     }
   },
+
+  async calculateMatchScore(
+    jobTitle: string,
+    company: string,
+    jobDescription: string
+  ): Promise<{ matchScore: number; summary: string; matchingSkills: string[]; missingSkills: string[] } | null> {
+    const token = await storageService.getAuthToken();
+    if (!token) return null;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/ai/match-score`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobTitle, company, jobDescription }),
+      });
+
+      const data = await res.json();
+      return data.success && data.data ? data.data : null;
+    } catch {
+      return null;
+    }
+  },
 };
