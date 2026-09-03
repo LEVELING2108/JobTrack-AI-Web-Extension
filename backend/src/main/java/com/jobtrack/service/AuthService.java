@@ -1,5 +1,6 @@
 package com.jobtrack.service;
 
+import com.jobtrack.dto.request.GoogleAuthRequest;
 import com.jobtrack.dto.request.LoginRequest;
 import com.jobtrack.dto.request.RefreshTokenRequest;
 import com.jobtrack.dto.request.RegisterRequest;
@@ -10,6 +11,7 @@ import com.jobtrack.security.UserPrincipal;
 public interface AuthService {
     AuthResponse register(RegisterRequest request);
     AuthResponse login(LoginRequest request);
+    AuthResponse loginWithGoogle(GoogleAuthRequest request);
     AuthResponse refreshToken(RefreshTokenRequest request);
     UserProfileResponse getCurrentUserProfile(UserPrincipal principal);
 }

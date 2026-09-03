@@ -1,5 +1,6 @@
 package com.jobtrack.controller;
 
+import com.jobtrack.dto.request.GoogleAuthRequest;
 import com.jobtrack.dto.request.LoginRequest;
 import com.jobtrack.dto.request.RefreshTokenRequest;
 import com.jobtrack.dto.request.RegisterRequest;
@@ -38,6 +39,13 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.ok("Logged in successfully", response));
+    }
+
+    @PostMapping("/google")
+    @Operation(summary = "Authenticate or register user with Google OAuth 2.0 Identity")
+    public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(@Valid @RequestBody GoogleAuthRequest request) {
+        AuthResponse response = authService.loginWithGoogle(request);
+        return ResponseEntity.ok(ApiResponse.ok("Google authentication successful", response));
     }
 
     @PostMapping("/refresh")

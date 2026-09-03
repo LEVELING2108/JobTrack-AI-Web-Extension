@@ -18,6 +18,25 @@ export interface SaveApplicationResult {
 }
 
 export const apiService = {
+  async loginWithGoogle(
+    idToken: string,
+    email?: string,
+    name?: string
+  ): Promise<ApiResponse<AuthSuccessPayload>> {
+    const res = await fetch(`${API_BASE_URL}/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken, email, name }),
+    });
+
+    const data: ApiResponse<AuthSuccessPayload> = await res.json();
+    if (res.ok && data.data?.accessToken) {
+      await storageService.setAuthToken(data.data.accessToken);
+      await storageService.setPreferences({ user: data.data.user });
+    }
+    return data;
+  },
+
   async login(email: string, password: string): Promise<ApiResponse<AuthSuccessPayload>> {
     const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',

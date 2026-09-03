@@ -1,5 +1,6 @@
 package com.jobtrack.entity;
 
+import com.jobtrack.enums.OAuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,8 +34,16 @@ public class User {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
+    @Column(name = "password_hash", length = 255)
     private String passwordHash;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "oauth_provider", length = 32, nullable = false)
+    @Builder.Default
+    private OAuthProvider oauthProvider = OAuthProvider.LOCAL;
+
+    @Column(name = "oauth_id", length = 255)
+    private String oauthId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
