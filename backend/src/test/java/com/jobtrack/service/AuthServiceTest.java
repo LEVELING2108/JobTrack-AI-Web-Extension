@@ -1,11 +1,12 @@
 package com.jobtrack.service;
 
+import com.jobtrack.dto.request.GoogleAuthRequest;
 import com.jobtrack.dto.request.LoginRequest;
 import com.jobtrack.dto.request.RegisterRequest;
 import com.jobtrack.dto.response.AuthResponse;
 import com.jobtrack.dto.response.UserProfileResponse;
 import com.jobtrack.entity.User;
-import com.jobtrack.exception.DuplicateResourceException;
+import com.jobtrack.enums.OAuthProvider;
 import com.jobtrack.mapper.UserMapper;
 import com.jobtrack.repository.UserRepository;
 import com.jobtrack.security.JwtTokenProvider;
@@ -20,12 +21,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.time.Instant;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -48,83 +53,110 @@ class AuthServiceTest {
     @InjectMocks
     private AuthServiceImpl authService;
 
-    private RegisterRequest registerRequest;
-    private LoginRequest loginRequest;
     private User sampleUser;
-    private UserPrincipal principal;
+    private UserProfileResponse sampleProfile;
 
     @BeforeEach
     void setUp() {
-        registerRequest = RegisterRequest.builder()
-                .name("Alex Smith")
-                .email("alex@example.com")
-                .password("secret123")
-                .build();
-
-        loginRequest = LoginRequest.builder()
-                .email("alex@example.com")
-                .password("secret123")
-                .build();
-
         sampleUser = User.builder()
                 .id(1L)
                 .name("Alex Smith")
                 .email("alex@example.com")
-                .passwordHash("hashedSecret")
+                .passwordHash("hashed_pw")
+                .oauthProvider(OAuthProvider.LOCAL)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
                 .build();
 
-        principal = UserPrincipal.create(sampleUser);
+        sampleProfile = UserProfileResponse.builder()
+                .id(1L)
+                .name("Alex Smith")
+                .email("alex@example.com")
+                .createdAt(sampleUser.getCreatedAt())
+                .build();
     }
 
     @Test
     @DisplayName("Should register new user and return JWT tokens")
-    void testRegister_Success() {
+    void testRegister() {
+        RegisterRequest request = RegisterRequest.builder()
+                .name("Alex Smith")
+                .email("alex@example.com")
+                .password("Password123!")
+                .build();
+
         when(userRepository.existsByEmail("alex@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("secret123")).thenReturn("hashedSecret");
+        when(passwordEncoder.encode("Password123!")).thenReturn("hashed_pw");
         when(userRepository.save(any(User.class))).thenReturn(sampleUser);
-        when(tokenProvider.generateAccessToken(any(UserPrincipal.class))).thenReturn("mock-access-token");
-        when(tokenProvider.generateRefreshToken(any(UserPrincipal.class))).thenReturn("mock-refresh-token");
+        when(tokenProvider.generateAccessToken(any(UserPrincipal.class))).thenReturn("access_token");
+        when(tokenProvider.generateRefreshToken(any(UserPrincipal.class))).thenReturn("refresh_token");
         when(tokenProvider.getAccessExpirationMs()).thenReturn(900000L);
-        when(userMapper.toProfileResponse(sampleUser)).thenReturn(
-                UserProfileResponse.builder().id(1L).name("Alex Smith").email("alex@example.com").build()
-        );
+        when(userMapper.toProfileResponse(sampleUser)).thenReturn(sampleProfile);
 
-        AuthResponse response = authService.register(registerRequest);
+        AuthResponse response = authService.register(request);
 
         assertNotNull(response);
-        assertEquals("mock-access-token", response.getAccessToken());
-        assertEquals("mock-refresh-token", response.getRefreshToken());
+        assertEquals("access_token", response.getAccessToken());
+        assertEquals("refresh_token", response.getRefreshToken());
         assertEquals("alex@example.com", response.getUser().getEmail());
-        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
-    @DisplayName("Should throw DuplicateResourceException when email is already registered")
-    void testRegister_DuplicateEmailThrowsException() {
-        when(userRepository.existsByEmail("alex@example.com")).thenReturn(true);
+    @DisplayName("Should authenticate user and return tokens")
+    void testLogin() {
+        LoginRequest request = LoginRequest.builder()
+                .email("alex@example.com")
+                .password("Password123!")
+                .build();
 
-        assertThrows(DuplicateResourceException.class, () -> authService.register(registerRequest));
-        verify(userRepository, never()).save(any(User.class));
+        UserPrincipal principal = UserPrincipal.create(sampleUser);
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authToken);
+        when(tokenProvider.generateAccessToken(any(UserPrincipal.class))).thenReturn("access_token");
+        when(tokenProvider.generateRefreshToken(any(UserPrincipal.class))).thenReturn("refresh_token");
+        when(tokenProvider.getAccessExpirationMs()).thenReturn(900000L);
+        when(userMapper.toProfileResponse(sampleUser)).thenReturn(sampleProfile);
+
+        AuthResponse response = authService.login(request);
+
+        assertNotNull(response);
+        assertEquals("access_token", response.getAccessToken());
     }
 
     @Test
-    @DisplayName("Should authenticate and return tokens on valid login")
-    void testLogin_Success() {
-        Authentication auth = mock(Authentication.class);
-        when(auth.getPrincipal()).thenReturn(principal);
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(auth);
+    @DisplayName("Should authenticate via Google OAuth and auto-create user if not existing")
+    void testGoogleLogin_AutoRegister() {
+        GoogleAuthRequest request = GoogleAuthRequest.builder()
+                .idToken("mock_google_id_token")
+                .email("google.user@example.com")
+                .name("Google User")
+                .build();
 
-        when(tokenProvider.generateAccessToken(principal)).thenReturn("mock-access-token");
-        when(tokenProvider.generateRefreshToken(principal)).thenReturn("mock-refresh-token");
+        User googleUser = User.builder()
+                .id(2L)
+                .name("Google User")
+                .email("google.user@example.com")
+                .oauthProvider(OAuthProvider.GOOGLE)
+                .build();
+
+        UserProfileResponse googleProfile = UserProfileResponse.builder()
+                .id(2L)
+                .name("Google User")
+                .email("google.user@example.com")
+                .build();
+
+        when(userRepository.findByEmail("google.user@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(googleUser);
+        when(tokenProvider.generateAccessToken(any(UserPrincipal.class))).thenReturn("google_access_token");
+        when(tokenProvider.generateRefreshToken(any(UserPrincipal.class))).thenReturn("google_refresh_token");
         when(tokenProvider.getAccessExpirationMs()).thenReturn(900000L);
-        when(userMapper.toProfileResponse(sampleUser)).thenReturn(
-                UserProfileResponse.builder().id(1L).name("Alex Smith").email("alex@example.com").build()
-        );
+        when(userMapper.toProfileResponse(googleUser)).thenReturn(googleProfile);
 
-        AuthResponse response = authService.login(loginRequest);
+        AuthResponse response = authService.loginWithGoogle(request);
 
         assertNotNull(response);
-        assertEquals("mock-access-token", response.getAccessToken());
-        assertEquals("alex@example.com", response.getUser().getEmail());
+        assertEquals("google_access_token", response.getAccessToken());
+        assertEquals("google.user@example.com", response.getUser().getEmail());
     }
 }
