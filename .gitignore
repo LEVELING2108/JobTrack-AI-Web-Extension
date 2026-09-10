@@ -67,3 +67,9 @@ coverage/
 *.docx
 *.doc
 *.pdf
+
+# Local conversation and chat logs (Private / Local only)
+CONVERSATION_HISTORY.md
+CHAT_HISTORY.md
+chat_history/
+*.chat.md
