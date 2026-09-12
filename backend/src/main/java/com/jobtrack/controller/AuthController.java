@@ -64,6 +64,10 @@ public class AuthController {
     @GetMapping("/me")
     @Operation(summary = "Get current authenticated user profile")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getCurrentUser(@CurrentUser UserPrincipal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.fail("UNAUTHORIZED", "Authentication required"));
+        }
         UserProfileResponse profile = authService.getCurrentUserProfile(principal);
         return ResponseEntity.ok(ApiResponse.ok(profile));
     }
