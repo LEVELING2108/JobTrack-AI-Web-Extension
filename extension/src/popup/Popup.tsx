@@ -661,10 +661,39 @@ export default function Popup() {
               </div>
 
               {/* Feedback Alerts */}
+              {saveSuccess && (
+                <div className="p-2.5 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-lg text-[11px] flex flex-col gap-1 shadow-xs animate-in fade-in">
+                  <div className="flex items-center gap-2 font-bold text-emerald-900">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Saved to your pipeline successfully!</span>
+                  </div>
+                  <p className="text-[10px] text-emerald-700">The job is now in your database under the Saved stage.</p>
+                  <a
+                    href="http://localhost:5173/kanban"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 hover:text-indigo-900 underline"
+                  >
+                    Open Kanban Board <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
+
               {isDuplicate && (
-                <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-[11px] flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>This job is already in your application pipeline!</span>
+                <div className="p-2.5 bg-amber-50 border border-amber-300 text-amber-900 rounded-lg text-[11px] flex flex-col gap-1 shadow-xs">
+                  <div className="flex items-center gap-2 font-bold">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Already Saved in Your Pipeline!</span>
+                  </div>
+                  <p className="text-[10px] text-amber-700">This exact job posting is already stored in your database.</p>
+                  <a
+                    href="http://localhost:5173/kanban"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 hover:text-indigo-900 underline"
+                  >
+                    View in Kanban Dashboard <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
               )}
 
