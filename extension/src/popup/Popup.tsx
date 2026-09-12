@@ -86,20 +86,59 @@ export default function Popup() {
     window.addEventListener('offline', handleOffline);
 
     // 4. Request extraction from active tab
+    runExtraction();
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const handleExtractionResponse = (response: any) => {
+    if (response && response.success && response.data) {
+      const data = response.data as ExtractedJobData;
+      setJobData(data);
+      setEditTitle(data.title);
+      setEditCompany(data.company);
+      setEditLocation(data.location || '');
+      if (data.salaryMin) setEditSalaryMin(data.salaryMin.toString());
+      if (data.salaryMax) setEditSalaryMax(data.salaryMax.toString());
+    }
+  };
+
+  const runExtraction = () => {
+    setLoading(true);
+    setErrorMessage('');
     if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const activeTab = tabs[0];
         if (activeTab?.id) {
           chrome.tabs.sendMessage(activeTab.id, { type: 'EXTRACT_JOB' }, (response) => {
-            setLoading(false);
-            if (response && response.success && response.data) {
-              const data = response.data as ExtractedJobData;
-              setJobData(data);
-              setEditTitle(data.title);
-              setEditCompany(data.company);
-              setEditLocation(data.location || '');
-              if (data.salaryMin) setEditSalaryMin(data.salaryMin.toString());
-              if (data.salaryMax) setEditSalaryMax(data.salaryMax.toString());
+            if (chrome.runtime.lastError || !response || !response.success) {
+              // Attempt programmatic content script injection if tab was open before extension loaded
+              if (chrome.scripting && chrome.scripting.executeScript) {
+                chrome.scripting
+                  .executeScript({
+                    target: { tabId: activeTab.id! },
+                    files: ['assets/content.js'],
+                  })
+                  .then(() => {
+                    setTimeout(() => {
+                      chrome.tabs.sendMessage(activeTab.id!, { type: 'EXTRACT_JOB' }, (retryRes) => {
+                        setLoading(false);
+                        handleExtractionResponse(retryRes);
+                      });
+                    }, 200);
+                  })
+                  .catch(() => {
+                    setLoading(false);
+                  });
+              } else {
+                setLoading(false);
+              }
+            } else {
+              setLoading(false);
+              handleExtractionResponse(response);
             }
           });
         } else {
@@ -109,12 +148,7 @@ export default function Popup() {
     } else {
       setLoading(false);
     }
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -676,15 +710,23 @@ export default function Popup() {
               <div className="max-w-[240px]">
                 <p className="font-semibold text-slate-700 text-xs">No Job Detected on this Page</p>
                 <p className="text-[11px] text-slate-400 mt-1">
-                  Navigate to a job posting on LinkedIn, Indeed, Glassdoor, or enter details manually below.
+                  Navigate to a job posting on LinkedIn, Indeed, Glassdoor, or refresh the tab if it was already open.
                 </p>
               </div>
-              <button
-                onClick={handleStartManualEntry}
-                className="mt-1 flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-md font-medium text-xs border border-indigo-200 transition"
-              >
-                <PlusCircle className="w-3.5 h-3.5" /> Manual Job Entry
-              </button>
+              <div className="flex items-center gap-2 mt-1">
+                <button
+                  onClick={runExtraction}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-medium text-xs border border-slate-300 transition"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" /> Re-scan Page
+                </button>
+                <button
+                  onClick={handleStartManualEntry}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-md font-medium text-xs border border-indigo-200 transition"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" /> Manual Entry
+                </button>
+              </div>
             </div>
           )}
         </>
