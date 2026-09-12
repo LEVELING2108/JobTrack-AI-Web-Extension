@@ -21,6 +21,7 @@ import {
   useAiCoverLetterMutation,
   useAiInterviewPrepMutation,
 } from '../../hooks/useAi';
+import PlatformBadge from '../common/PlatformBadge';
 
 interface DetailsProps {
   application: Application;
@@ -112,9 +113,9 @@ export default function ApplicationDetailsModal({ application, onClose }: Detail
         {/* Header */}
         <div className="flex items-start justify-between border-b border-slate-100 pb-3">
           <div className="flex-1 pr-4">
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 mb-1">
-              {application.job.source}
-            </span>
+            <div className="mb-1.5">
+              <PlatformBadge source={application.job.source} size="sm" />
+            </div>
             <h2 className="text-base font-bold text-slate-900">{application.job.title}</h2>
             <div className="flex items-center gap-3 text-xs text-slate-600 mt-0.5">
               <span className="flex items-center gap-1 font-semibold text-slate-800">

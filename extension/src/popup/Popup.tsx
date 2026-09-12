@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Check,
   AlertCircle,
   ExternalLink,
   BookmarkCheck,
@@ -25,6 +24,7 @@ import { storageService } from '../services/storageService';
 import { apiService } from '../services/apiService';
 import { syncService } from '../services/syncService';
 import BrandLogo from '../components/BrandLogo';
+import PlatformBadge from '../components/PlatformBadge';
 
 const PRIMARY_STAGES: { value: ApplicationStatus; label: string; color: string; activeColor: string }[] = [
   { value: 'SAVED', label: 'Saved', color: 'text-indigo-600 bg-indigo-50 border-indigo-200', activeColor: 'bg-indigo-600 text-white border-indigo-600 shadow-xs' },
@@ -321,28 +321,6 @@ export default function Popup() {
 
   const companyInitial = (editCompany || jobData?.company || 'J').charAt(0).toUpperCase();
 
-  const getSourceBadge = (source?: string) => {
-    const s = (source || '').toUpperCase();
-    if (s.includes('LINKEDIN')) {
-      return { label: 'LinkedIn', bg: 'bg-[#0A66C2]/10 text-[#0A66C2] border-[#0A66C2]/30' };
-    }
-    if (s.includes('INDEED')) {
-      return { label: 'Indeed', bg: 'bg-blue-50 text-blue-700 border-blue-200' };
-    }
-    if (s.includes('GLASSDOOR')) {
-      return { label: 'Glassdoor', bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-    }
-    if (s.includes('CAREER') || s.includes('PORTAL')) {
-      return { label: 'Career Portal', bg: 'bg-purple-50 text-purple-700 border-purple-200' };
-    }
-    if (s.includes('MANUAL')) {
-      return { label: 'Manual Entry', bg: 'bg-slate-100 text-slate-700 border-slate-200' };
-    }
-    return { label: 'Web Posting', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
-  };
-
-  const sourceBadge = getSourceBadge(jobData?.source);
-
   return (
     <div className="w-[400px] min-h-[520px] bg-slate-50 text-slate-800 flex flex-col font-sans select-none">
       {/* Top Navigation Bar with Gradient Accent */}
@@ -604,10 +582,9 @@ export default function Popup() {
                   </span>
                 )}
 
-                <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md border ${sourceBadge.bg} ml-auto`}>
-                  <Check className="w-3 h-3 shrink-0" />
-                  <span>{sourceBadge.label}</span>
-                </span>
+                <div className="ml-auto">
+                  <PlatformBadge source={jobData?.source} size="xs" />
+                </div>
               </div>
             </div>
 

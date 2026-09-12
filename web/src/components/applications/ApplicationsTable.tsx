@@ -3,6 +3,7 @@ import { Building, MapPin, Search, Filter, ExternalLink, Calendar, Trash2 } from
 import { Application, ApplicationStatus } from '../../types';
 import { useApplicationsQuery, useDeleteApplicationMutation, useUpdateStatusMutation } from '../../hooks/useApplications';
 import ApplicationDetailsModal from './ApplicationDetailsModal';
+import PlatformBadge from '../common/PlatformBadge';
 
 const statusBadgeStyles: Record<ApplicationStatus, string> = {
   SAVED: 'bg-slate-100 text-slate-700 border-slate-200',
@@ -147,9 +148,7 @@ export const ApplicationsTable: React.FC = () => {
                     </select>
                   </td>
                   <td className="py-3 px-4 text-slate-600 text-[11px]">
-                    <span className="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-medium text-slate-600">
-                      {app.job.source}
-                    </span>
+                    <PlatformBadge source={app.job.source} size="xs" />
                   </td>
                   <td className="py-3 px-4 text-slate-500 text-[11px]">
                     <span className="flex items-center gap-1">

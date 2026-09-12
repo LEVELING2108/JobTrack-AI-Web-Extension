@@ -1,6 +1,7 @@
 import React from 'react';
 import { Building, MapPin, DollarSign, ExternalLink, Calendar } from 'lucide-react';
 import { Application, ApplicationStatus } from '../../types';
+import PlatformBadge from '../common/PlatformBadge';
 
 interface KanbanCardProps {
   application: Application;
@@ -72,10 +73,13 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ application, onSelect, o
       )}
 
       <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
-        <span className="text-slate-400 flex items-center gap-1">
-          <Calendar className="w-3 h-3" />
-          {new Date(application.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <PlatformBadge source={job.source} size="xs" />
+          <span className="text-slate-400 flex items-center gap-1">
+            <Calendar className="w-3 h-3" />
+            {new Date(application.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+          </span>
+        </div>
 
         <select
           value={application.status}
