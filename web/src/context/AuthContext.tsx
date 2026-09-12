@@ -21,18 +21,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('jobtrack_access_token');
-    const savedUser = localStorage.getItem('jobtrack_user');
-
-    if (savedToken && savedUser) {
-      setToken(savedToken);
+    const initAuth = async () => {
       try {
-        setUser(JSON.parse(savedUser));
-      } catch {
-        localStorage.removeItem('jobtrack_user');
+        const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+        const syncToken = urlParams ? (urlParams.get('sync_token') || urlParams.get('token')) : null;
+
+        if (syncToken) {
+          try {
+            const res = await api.get<ApiResponse<User>>('/auth/me', {
+              headers: { Authorization: `Bearer ${syncToken}` },
+            });
+            if (res.data.success && res.data.data) {
+              const verifiedUser = res.data.data;
+              setToken(syncToken);
+              setUser(verifiedUser);
+              localStorage.setItem('jobtrack_access_token', syncToken);
+              localStorage.setItem('jobtrack_user', JSON.stringify(verifiedUser));
+
+              // Clean up sync parameter from address bar cleanly without page refresh
+              if (urlParams) {
+                urlParams.delete('sync_token');
+                urlParams.delete('token');
+                const remaining = urlParams.toString() ? `?${urlParams.toString()}` : '';
+                window.history.replaceState(
+                  {},
+                  document.title,
+                  window.location.pathname + remaining + window.location.hash
+                );
+              }
+              setIsLoading(false);
+              return;
+            }
+          } catch (syncErr) {
+            console.warn('Cross-origin token sync failed or expired', syncErr);
+          }
+        }
+
+        const savedToken = localStorage.getItem('jobtrack_access_token');
+        const savedUser = localStorage.getItem('jobtrack_user');
+
+        if (savedToken && savedUser) {
+          setToken(savedToken);
+          try {
+            setUser(JSON.parse(savedUser));
+          } catch {
+            localStorage.removeItem('jobtrack_user');
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {

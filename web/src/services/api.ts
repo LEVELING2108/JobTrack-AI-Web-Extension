@@ -8,7 +8,9 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('jobtrack_access_token');
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const syncToken = urlParams ? (urlParams.get('sync_token') || urlParams.get('token')) : null;
+  const token = syncToken || localStorage.getItem('jobtrack_access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

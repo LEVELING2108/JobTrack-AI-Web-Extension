@@ -13,3 +13,33 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 });
+
+// Bi-directional auth sync between web dashboard and extension
+if (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173') {
+  const syncFromWebToExtension = () => {
+    try {
+      const webToken = localStorage.getItem('jobtrack_access_token');
+      if (webToken) {
+        chrome.storage?.local?.get('jobtrack_auth_token', (res) => {
+          if (res && res['jobtrack_auth_token'] !== webToken) {
+            chrome.storage.local.set({ jobtrack_auth_token: webToken });
+          }
+        });
+      }
+    } catch {
+      // Ignore if localStorage unavailable
+    }
+  };
+
+  syncFromWebToExtension();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'jobtrack_access_token') {
+      if (e.newValue) {
+        chrome.storage?.local?.set({ jobtrack_auth_token: e.newValue });
+      } else {
+        chrome.storage?.local?.remove('jobtrack_auth_token');
+      }
+    }
+  });
+}
+
