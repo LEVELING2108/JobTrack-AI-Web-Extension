@@ -305,6 +305,20 @@ export default function Popup() {
     setEditSalaryMax('');
   };
 
+  const handleOpenDashboard = async (path: string = '/kanban') => {
+    const token = await storageService.getAuthToken();
+    const baseUrl = 'http://localhost:5173';
+    const targetUrl = token
+      ? `${baseUrl}${path}?sync_token=${encodeURIComponent(token)}`
+      : `${baseUrl}${path}`;
+
+    if (typeof chrome !== 'undefined' && chrome.tabs?.create) {
+      chrome.tabs.create({ url: targetUrl });
+    } else {
+      window.open(targetUrl, '_blank');
+    }
+  };
+
   const companyInitial = (editCompany || jobData?.company || 'J').charAt(0).toUpperCase();
 
   const getSourceBadge = (source?: string) => {
@@ -375,15 +389,14 @@ export default function Popup() {
             </button>
           )}
 
-          <a
-            href="http://localhost:5173/kanban"
-            target="_blank"
-            rel="noreferrer"
-            className="w-7 h-7 rounded-full flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all"
+          <button
+            type="button"
+            onClick={() => handleOpenDashboard('/kanban')}
+            className="w-7 h-7 rounded-full flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all cursor-pointer"
             title="Open Kanban Board"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+          </button>
         </div>
       </header>
 
@@ -805,14 +818,13 @@ export default function Popup() {
                 <p className="text-[11px] text-emerald-800 font-medium">
                   The application is now stored in PostgreSQL under the <span className="font-bold">{status}</span> stage.
                 </p>
-                <a
-                  href="http://localhost:5173/kanban"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-[11px] shadow-xs transition"
+                <button
+                  type="button"
+                  onClick={() => handleOpenDashboard('/kanban')}
+                  className="mt-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-[11px] shadow-xs transition cursor-pointer"
                 >
                   Open Kanban Board <ArrowRight className="w-3.5 h-3.5" />
-                </a>
+                </button>
               </div>
             )}
 
@@ -826,14 +838,13 @@ export default function Popup() {
                 <p className="text-[11px] text-amber-800 font-medium">
                   This job posting has already been captured and saved in your database.
                 </p>
-                <a
-                  href="http://localhost:5173/kanban"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-[11px] shadow-xs transition"
+                <button
+                  type="button"
+                  onClick={() => handleOpenDashboard('/kanban')}
+                  className="mt-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-[11px] shadow-xs transition cursor-pointer"
                 >
                   View in Kanban Dashboard <ArrowRight className="w-3.5 h-3.5" />
-                </a>
+                </button>
               </div>
             )}
 
