@@ -39,7 +39,7 @@ export class GenericExtractor implements JobExtractor {
           title: document.title.split(/[-–|]/)[0].trim(),
           company: window.location.hostname.replace('www.', ''),
           url: normalizeJobUrl(window.location.href),
-          source: 'GENERIC_FALLBACK',
+          source: 'GENERIC',
           extractedAt: new Date().toISOString(),
         };
       }
@@ -117,7 +117,7 @@ export class GenericExtractor implements JobExtractor {
             currency,
             employmentType,
             postedDate: job.datePosted,
-            source: 'STRUCTURED_JSON_LD',
+            source: 'GENERIC',
             extractedAt: new Date().toISOString(),
           };
         }
@@ -139,7 +139,7 @@ export class GenericExtractor implements JobExtractor {
         company: ogSite?.trim() || window.location.hostname.replace('www.', ''),
         url: normalizeJobUrl(window.location.href),
         description: ogDesc?.trim().substring(0, 4000),
-        source: 'OPEN_GRAPH_META',
+        source: 'GENERIC',
         extractedAt: new Date().toISOString(),
       };
     }
@@ -160,7 +160,7 @@ export class GenericExtractor implements JobExtractor {
       title: titleText,
       company,
       url: normalizeJobUrl(window.location.href),
-      source: 'SEMANTIC_DOM_HEURISTIC',
+      source: 'GENERIC',
       extractedAt: new Date().toISOString(),
     };
   }

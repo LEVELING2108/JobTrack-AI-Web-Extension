@@ -62,7 +62,7 @@ export class CompanyCareerExtractor implements JobExtractor {
         location: location || undefined,
         url: normalizeJobUrl(url),
         description: description || undefined,
-        source: 'COMPANY_CAREER_PORTAL',
+        source: 'COMPANY_WEBSITE',
         extractedAt: new Date().toISOString(),
       };
     } catch {
