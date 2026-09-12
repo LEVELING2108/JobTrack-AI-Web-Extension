@@ -23,7 +23,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     Page<Application> findByUserIdAndStatus(Long userId, ApplicationStatus status, Pageable pageable);
 
     @Query("SELECT a FROM Application a JOIN a.job j WHERE a.user.id = :userId AND " +
-           "(:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(j.company) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           "(:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR LOWER(j.company) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%'))) AND " +
            "(:status IS NULL OR a.status = :status)")
     Page<Application> searchApplications(
             @Param("userId") Long userId,
