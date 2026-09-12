@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Briefcase,
   Check,
   AlertCircle,
   ExternalLink,
@@ -25,6 +24,7 @@ import { ExtractedJobData, ApplicationStatus, User } from '../types';
 import { storageService } from '../services/storageService';
 import { apiService } from '../services/apiService';
 import { syncService } from '../services/syncService';
+import BrandLogo from '../components/BrandLogo';
 
 const PRIMARY_STAGES: { value: ApplicationStatus; label: string; color: string; activeColor: string }[] = [
   { value: 'SAVED', label: 'Saved', color: 'text-indigo-600 bg-indigo-50 border-indigo-200', activeColor: 'bg-indigo-600 text-white border-indigo-600 shadow-xs' },
@@ -348,9 +348,7 @@ export default function Popup() {
       {/* Top Navigation Bar with Gradient Accent */}
       <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-2.5 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-sm shadow-indigo-500/25">
-            <Briefcase className="w-4 h-4" />
-          </div>
+          <BrandLogo size={32} />
           <div>
             <div className="flex items-center gap-1.5">
               <h1 className="font-extrabold text-sm tracking-tight text-slate-900 leading-none">JobTrack</h1>

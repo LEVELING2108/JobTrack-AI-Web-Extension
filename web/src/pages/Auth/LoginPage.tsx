@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Briefcase, AlertCircle, ArrowRight, Lock, Mail } from 'lucide-react';
+import { AlertCircle, ArrowRight, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import BrandLogo from '../../components/common/BrandLogo';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -22,7 +23,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Invalid email or password.');
+      setError(err.message || 'Login failed.');
     } finally {
       setLoading(false);
     }
@@ -35,7 +36,7 @@ export default function LoginPage() {
     try {
       // Create a secure client nonce / token payload for Google OAuth flow
       const mockSub = Math.random().toString(36).substring(2, 15);
-      const googleEmail = prompt('Enter your Google email to sign in:', 'user@gmail.com');
+      const googleEmail = prompt('Enter your Google email for 1-click sign-in:', 'user@gmail.com');
       
       if (!googleEmail) {
         setGoogleLoading(false);
@@ -59,9 +60,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="bg-indigo-600 p-3 rounded-2xl shadow-md text-white">
-            <Briefcase className="w-8 h-8" />
-          </div>
+          <BrandLogo size={56} />
         </div>
         <h2 className="mt-4 text-center text-2xl font-black text-slate-900 tracking-tight">
           Welcome back to JobTrack

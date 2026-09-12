@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Briefcase, AlertCircle, ArrowRight, Lock, Mail, User } from 'lucide-react';
+import { AlertCircle, ArrowRight, Lock, Mail, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import BrandLogo from '../../components/common/BrandLogo';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -65,9 +66,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="bg-indigo-600 p-3 rounded-2xl shadow-md text-white">
-            <Briefcase className="w-8 h-8" />
-          </div>
+          <BrandLogo size={56} />
         </div>
         <h2 className="mt-4 text-center text-2xl font-black text-slate-900 tracking-tight">
           Create your JobTrack Account
