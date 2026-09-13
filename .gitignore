@@ -19,6 +19,8 @@ target/
 *.class
 *.tsbuildinfo
 *.tar.gz
+*.zip
+release/
 *.mv.db
 oracleJdk*/
 

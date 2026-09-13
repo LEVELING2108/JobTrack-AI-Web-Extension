@@ -11,6 +11,7 @@ import ApplicationsPage from './pages/Applications/ApplicationsPage';
 import InterviewsPage from './pages/Interviews/InterviewsPage';
 import AnalyticsPage from './pages/Analytics/AnalyticsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
+import PrivacyPage from './pages/Privacy/PrivacyPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,7 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
 
             <Route
               path="/"
