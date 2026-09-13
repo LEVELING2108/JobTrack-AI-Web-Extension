@@ -12,6 +12,24 @@
 
 ---
 
+## 🚀 Live Production & Direct Download
+
+| Service | Status | Link |
+| :--- | :--- | :--- |
+| **Web Dashboard** | 🟢 Live | [https://jobtrack.antideploy.com](https://jobtrack.antideploy.com) |
+| **Backend REST API** | 🟢 Live | [https://jobtrack-api.antideploy.com](https://jobtrack-api.antideploy.com) |
+| **Swagger UI Docs** | 🟢 Live | [https://jobtrack-api.antideploy.com/swagger-ui/index.html](https://jobtrack-api.antideploy.com/swagger-ui/index.html) |
+| **Browser Extension ZIP** | 📦 v1.0.0 | [Direct Download (.zip)](https://jobtrack.antideploy.com/downloads/jobtrack-extension.zip) |
+| **Extension Showcase** | 🌐 Live | [https://jobtrack.antideploy.com/extension](https://jobtrack.antideploy.com/extension) |
+
+### ⚡ 3-Step Quick Install for Chrome / Edge / Brave
+
+1. **Download & Extract**: Download [**`jobtrack-extension.zip`**](https://jobtrack.antideploy.com/downloads/jobtrack-extension.zip) and extract it to a permanent folder.
+2. **Open Extensions**: In your browser (Chrome, Edge, Brave, Opera), navigate to `chrome://extensions` (or `edge://extensions`) and toggle **Developer mode** **ON** (top-right).
+3. **Load Unpacked**: Click **Load unpacked** (top-left) and select the extracted folder. Pin the JobTrack icon to your toolbar!
+
+---
+
 ## 🏛️ System Architecture
 
 ### High-Level Interaction Diagram
