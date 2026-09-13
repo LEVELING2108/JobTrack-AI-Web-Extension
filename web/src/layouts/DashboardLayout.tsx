@@ -12,9 +12,12 @@ import {
   Menu,
   X,
   User as UserIcon,
+  Puzzle,
+  Download,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AddApplicationModal from '../components/applications/AddApplicationModal';
+import DownloadExtensionModal from '../components/common/DownloadExtensionModal';
 import BrandLogo from '../components/common/BrandLogo';
 
 export default function DashboardLayout() {
@@ -22,6 +25,7 @@ export default function DashboardLayout() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
 
   const navItems = [
     { label: 'Overview', path: '/dashboard', icon: LayoutDashboard },
@@ -73,6 +77,23 @@ export default function DashboardLayout() {
               );
             })}
           </nav>
+
+          <div className="mx-3 mt-4 p-3 bg-gradient-to-br from-indigo-50/90 to-purple-50/90 rounded-xl border border-indigo-100/80 shadow-sm">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center text-white shrink-0 shadow-sm shadow-indigo-500/20">
+                <Puzzle className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-xs font-bold text-slate-800">Browser Extension</span>
+              <span className="ml-auto text-[9px] font-bold text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded-full">Free</span>
+            </div>
+            <p className="text-[11px] text-slate-500 mb-2.5 leading-snug">Clip jobs directly from LinkedIn & Indeed.</p>
+            <button
+              onClick={() => setIsExtensionModalOpen(true)}
+              className="w-full py-1.5 px-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-[11px] font-semibold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5"
+            >
+              <Download className="w-3 h-3" /> Get Extension (.zip)
+            </button>
+          </div>
         </div>
 
         <div className="p-4 border-t border-slate-100">
@@ -150,6 +171,10 @@ export default function DashboardLayout() {
       </main>
 
       {isAddModalOpen && <AddApplicationModal onClose={() => setIsAddModalOpen(false)} />}
+      <DownloadExtensionModal
+        isOpen={isExtensionModalOpen}
+        onClose={() => setIsExtensionModalOpen(false)}
+      />
     </div>
   );
 }
