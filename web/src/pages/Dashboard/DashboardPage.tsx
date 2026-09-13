@@ -1,16 +1,13 @@
 import {
-  Bookmark,
-  Send,
-  Users,
-  Video,
-  Award,
-  XCircle,
+  Briefcase,
   TrendingUp,
   ArrowUpRight,
 } from 'lucide-react';
 import { useApplicationSummaryQuery } from '../../hooks/useApplications';
 import { ApplicationsTable } from '../../components/applications/ApplicationsTable';
 import RemindersWidget from '../../components/reminders/RemindersWidget';
+import { ApplicationStatus } from '../../types';
+import { STAGE_CONFIG, StageIcon } from '../../components/common/StageBadge';
 
 export default function DashboardPage() {
   const { data: summary, isLoading: summaryLoading } = useApplicationSummaryQuery();
@@ -21,13 +18,13 @@ export default function DashboardPage() {
   const applied = summary?.applied || 0;
   const responseRate = total > 0 ? Math.round(((interviews + offers) / total) * 100) : 0;
 
-  const kpis = [
-    { label: 'Total Tracked', value: total, icon: Bookmark, color: 'text-slate-700', bg: 'bg-slate-100' },
-    { label: 'Applied', value: applied, icon: Send, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Screening', value: summary?.screening || 0, icon: Users, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Interviews', value: interviews, icon: Video, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { label: 'Offers', value: offers, icon: Award, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Rejected', value: summary?.rejected || 0, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
+  const kpis: { label: string; value: number; status?: ApplicationStatus; isTotal?: boolean }[] = [
+    { label: 'Total Tracked', value: total, isTotal: true },
+    { label: 'Applied', value: applied, status: 'APPLIED' },
+    { label: 'Screening', value: summary?.screening || 0, status: 'SCREENING' },
+    { label: 'Interviews', value: interviews, status: 'INTERVIEW' },
+    { label: 'Offers', value: offers, status: 'OFFER' },
+    { label: 'Rejected', value: summary?.rejected || 0, status: 'REJECTED' },
   ];
 
   return (
@@ -41,7 +38,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {kpis.map((kpi) => {
-          const Icon = kpi.icon;
+          const cfg = kpi.status ? STAGE_CONFIG[kpi.status] : null;
           return (
             <div
               key={kpi.label}
@@ -49,8 +46,12 @@ export default function DashboardPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-semibold text-slate-500">{kpi.label}</span>
-                <div className={`p-1.5 rounded-lg ${kpi.bg} ${kpi.color}`}>
-                  <Icon className="w-3.5 h-3.5" />
+                <div className={`p-1.5 rounded-lg ${cfg ? `${cfg.bg} ${cfg.text}` : 'bg-slate-100 text-slate-700'}`}>
+                  {kpi.status ? (
+                    <StageIcon status={kpi.status} className="w-3.5 h-3.5" />
+                  ) : (
+                    <Briefcase className="w-3.5 h-3.5" />
+                  )}
                 </div>
               </div>
               <p className="text-xl font-extrabold text-slate-900 mt-2">

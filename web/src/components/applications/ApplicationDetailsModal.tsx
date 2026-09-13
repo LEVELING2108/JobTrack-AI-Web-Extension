@@ -22,6 +22,7 @@ import {
   useAiInterviewPrepMutation,
 } from '../../hooks/useAi';
 import PlatformBadge from '../common/PlatformBadge';
+import StageBadge, { STAGE_CONFIG, StageIcon } from '../common/StageBadge';
 
 interface DetailsProps {
   application: Application;
@@ -113,8 +114,9 @@ export default function ApplicationDetailsModal({ application, onClose }: Detail
         {/* Header */}
         <div className="flex items-start justify-between border-b border-slate-100 pb-3">
           <div className="flex-1 pr-4">
-            <div className="mb-1.5">
+            <div className="flex items-center gap-2 mb-1.5">
               <PlatformBadge source={application.job.source} size="sm" />
+              <StageBadge status={status} size="sm" />
             </div>
             <h2 className="text-base font-bold text-slate-900">{application.job.title}</h2>
             <div className="flex items-center gap-3 text-xs text-slate-600 mt-0.5">
@@ -166,21 +168,33 @@ export default function ApplicationDetailsModal({ application, onClose }: Detail
               {/* Metadata Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
                 <div>
-                  <span className="text-[10px] text-slate-400 font-medium">Status</span>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
-                    className="mt-1 w-full bg-white border border-slate-300 rounded p-1 text-xs font-semibold focus:ring-1 focus:ring-indigo-500 outline-none"
-                  >
-                    <option value="SAVED">Saved</option>
-                    <option value="APPLIED">Applied</option>
-                    <option value="SCREENING">Screening</option>
-                    <option value="INTERVIEW">Interview</option>
-                    <option value="OFFER">Offer</option>
-                    <option value="ACCEPTED">Accepted</option>
-                    <option value="REJECTED">Rejected</option>
-                    <option value="WITHDRAWN">Withdrawn</option>
-                  </select>
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lifecycle Stage</span>
+                  <div className="mt-1 relative">
+                    <span className="pointer-events-none absolute left-2.5 top-2 z-10">
+                      <StageIcon status={status} className="w-3.5 h-3.5" />
+                    </span>
+                    <select
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
+                      className={`appearance-none w-full border rounded-lg pl-8 pr-7 py-1.5 text-xs font-bold outline-none cursor-pointer shadow-2xs transition ${
+                        STAGE_CONFIG[status]?.bg || 'bg-white'
+                      } ${STAGE_CONFIG[status]?.text || 'text-slate-800'} ${STAGE_CONFIG[status]?.border || 'border-slate-300'}`}
+                    >
+                      <option value="SAVED" className="bg-white text-slate-800 font-medium">Saved</option>
+                      <option value="APPLIED" className="bg-white text-slate-800 font-medium">Applied</option>
+                      <option value="SCREENING" className="bg-white text-slate-800 font-medium">Screening</option>
+                      <option value="INTERVIEW" className="bg-white text-slate-800 font-medium">Interview</option>
+                      <option value="OFFER" className="bg-white text-slate-800 font-medium">Offer</option>
+                      <option value="ACCEPTED" className="bg-white text-slate-800 font-medium">Accepted</option>
+                      <option value="REJECTED" className="bg-white text-slate-800 font-medium">Rejected</option>
+                      <option value="WITHDRAWN" className="bg-white text-slate-800 font-medium">Withdrawn</option>
+                    </select>
+                    <span className="pointer-events-none absolute right-2.5 top-2.5 text-current opacity-60">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
+                  </div>
                 </div>
 
                 <div>

@@ -17,6 +17,7 @@ target/
 *.war
 *.ear
 *.class
+*.tsbuildinfo
 
 # Environment variables & secrets
 .env
