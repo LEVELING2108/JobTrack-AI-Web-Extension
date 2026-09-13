@@ -15,7 +15,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 // Bi-directional auth sync between web dashboard and extension
-if (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173') {
+const isJobTrackHost = typeof window !== 'undefined' && (
+  (window.location.hostname === 'localhost' && window.location.port === '5173') ||
+  window.location.hostname === 'jobtrack.antideploy.com' ||
+  window.location.hostname === 'jobtrack-ai.antideploy.com'
+);
+
+if (isJobTrackHost) {
   const syncFromWebToExtension = () => {
     try {
       const webToken = localStorage.getItem('jobtrack_access_token');

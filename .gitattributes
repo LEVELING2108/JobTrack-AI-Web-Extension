@@ -1,0 +1,3 @@
+# Keep Unix line endings for shell scripts and maven wrapper
+*mvnw text eol=lf
+*.sh text eol=lf

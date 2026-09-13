@@ -301,7 +301,11 @@ export default function Popup() {
 
   const handleOpenDashboard = async (path: string = '/kanban') => {
     const token = await storageService.getAuthToken();
-    const baseUrl = 'http://localhost:5173';
+    const baseUrl = import.meta.env.VITE_WEB_BASE_URL || (
+      import.meta.env.PROD
+        ? 'https://jobtrack.antideploy.com'
+        : 'http://localhost:5173'
+    );
     const targetUrl = token
       ? `${baseUrl}${path}?sync_token=${encodeURIComponent(token)}`
       : `${baseUrl}${path}`;
