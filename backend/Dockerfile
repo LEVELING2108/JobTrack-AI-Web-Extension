@@ -4,6 +4,9 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /workspace
 
+# Ensure curl is available for Maven wrapper
+RUN apk add --no-cache curl
+
 # Copy Maven wrapper and POM for dependency caching
 COPY .mvn .mvn
 COPY mvnw pom.xml ./
@@ -20,7 +23,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Run as non-root user for container security
-RUN addgroup -S jobtrack && adduser -S jobtrack -G jobtrack
+RUN addgroup -S jobtrack && adduser -S jobtrack -G jobtrack && mkdir -p /app/data && chown -R jobtrack:jobtrack /app
 USER jobtrack:jobtrack
 
 # Copy executable jar from builder stage
@@ -32,4 +35,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 --start-period=30s \
   CMD wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -Dserver.port=${PORT:-8080} -jar app.jar"]

@@ -18,6 +18,9 @@ target/
 *.ear
 *.class
 *.tsbuildinfo
+*.tar.gz
+*.mv.db
+oracleJdk*/
 
 # Environment variables & secrets
 .env

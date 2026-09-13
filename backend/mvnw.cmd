@@ -6,6 +6,7 @@
 
 set "DIR=%~dp0"
 set "MAVEN_PROJECTBASEDIR=%DIR%"
+if "%MAVEN_PROJECTBASEDIR:~-1%"=="\" set "MAVEN_PROJECTBASEDIR=%MAVEN_PROJECTBASEDIR:~0,-1%"
 set "WRAPPER_JAR=%DIR%.mvn\wrapper\maven-wrapper.jar"
 
 set "JAVA_EXE=java"
