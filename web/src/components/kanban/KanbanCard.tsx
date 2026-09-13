@@ -2,6 +2,7 @@ import React from 'react';
 import { Building, MapPin, DollarSign, ExternalLink, Calendar } from 'lucide-react';
 import { Application, ApplicationStatus } from '../../types';
 import PlatformBadge from '../common/PlatformBadge';
+import { STAGE_CONFIG } from '../common/StageBadge';
 
 interface KanbanCardProps {
   application: Application;
@@ -22,6 +23,7 @@ const statusOptions: { label: string; value: ApplicationStatus }[] = [
 
 export const KanbanCard: React.FC<KanbanCardProps> = ({ application, onSelect, onStatusChange }) => {
   const { job } = application;
+  const stageCfg = STAGE_CONFIG[application.status] || STAGE_CONFIG.SAVED;
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-2xs hover:shadow-sm transition group">
@@ -81,17 +83,26 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ application, onSelect, o
           </span>
         </div>
 
-        <select
-          value={application.status}
-          onChange={(e) => onStatusChange(application.id, e.target.value as ApplicationStatus)}
-          className="bg-slate-50 text-[10px] text-slate-600 font-medium border border-slate-200 rounded px-1.5 py-0.5 focus:ring-1 focus:ring-indigo-500 outline-none"
-        >
-          {statusOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              Move: {opt.label}
-            </option>
-          ))}
-        </select>
+        <div className="relative inline-flex items-center">
+          <select
+            value={application.status}
+            onChange={(e) => onStatusChange(application.id, e.target.value as ApplicationStatus)}
+            className={`appearance-none text-[9px] font-bold rounded-md pl-2 pr-4 py-0.5 border cursor-pointer outline-none transition shadow-2xs ${
+              stageCfg.bg
+            } ${stageCfg.text} ${stageCfg.border}`}
+          >
+            {statusOptions.map((opt) => (
+              <option key={opt.value} value={opt.value} className="bg-white text-slate-800 font-medium">
+                → {opt.label}
+              </option>
+            ))}
+          </select>
+          <span className="pointer-events-none absolute right-1 text-current opacity-60">
+            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </span>
+        </div>
       </div>
     </div>
   );

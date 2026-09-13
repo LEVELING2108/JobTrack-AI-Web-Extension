@@ -4,17 +4,7 @@ import { Application, ApplicationStatus } from '../../types';
 import { useApplicationsQuery, useDeleteApplicationMutation, useUpdateStatusMutation } from '../../hooks/useApplications';
 import ApplicationDetailsModal from './ApplicationDetailsModal';
 import PlatformBadge from '../common/PlatformBadge';
-
-const statusBadgeStyles: Record<ApplicationStatus, string> = {
-  SAVED: 'bg-slate-100 text-slate-700 border-slate-200',
-  APPLIED: 'bg-blue-50 text-blue-700 border-blue-200',
-  SCREENING: 'bg-amber-50 text-amber-700 border-amber-200',
-  INTERVIEW: 'bg-purple-50 text-purple-700 border-purple-200',
-  OFFER: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  ACCEPTED: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-  REJECTED: 'bg-rose-50 text-rose-700 border-rose-200',
-  WITHDRAWN: 'bg-slate-100 text-slate-500 border-slate-200',
-};
+import { STAGE_CONFIG, StageIcon } from '../common/StageBadge';
 
 export const ApplicationsTable: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -128,24 +118,34 @@ export const ApplicationsTable: React.FC = () => {
                     )}
                   </td>
                   <td className="py-3 px-4">
-                    <select
-                      value={app.status}
-                      onChange={(e) =>
-                        updateStatusMutation.mutate({ id: app.id, status: e.target.value as ApplicationStatus })
-                      }
-                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
-                        statusBadgeStyles[app.status]
-                      } outline-none cursor-pointer`}
-                    >
-                      <option value="SAVED">Saved</option>
-                      <option value="APPLIED">Applied</option>
-                      <option value="SCREENING">Screening</option>
-                      <option value="INTERVIEW">Interview</option>
-                      <option value="OFFER">Offer</option>
-                      <option value="ACCEPTED">Accepted</option>
-                      <option value="REJECTED">Rejected</option>
-                      <option value="WITHDRAWN">Withdrawn</option>
-                    </select>
+                    <div className="relative inline-flex items-center">
+                      <span className="pointer-events-none absolute left-2 text-current z-10">
+                        <StageIcon status={app.status} className="w-2.5 h-2.5" />
+                      </span>
+                      <select
+                        value={app.status}
+                        onChange={(e) =>
+                          updateStatusMutation.mutate({ id: app.id, status: e.target.value as ApplicationStatus })
+                        }
+                        className={`appearance-none text-[10px] font-bold uppercase tracking-wider pl-6 pr-5 py-1 rounded-md border cursor-pointer outline-none transition shadow-2xs ${
+                          STAGE_CONFIG[app.status]?.bg || 'bg-slate-50'
+                        } ${STAGE_CONFIG[app.status]?.text || 'text-slate-700'} ${STAGE_CONFIG[app.status]?.border || 'border-slate-200'}`}
+                      >
+                        <option value="SAVED" className="bg-white text-slate-800 font-medium normal-case">Saved</option>
+                        <option value="APPLIED" className="bg-white text-slate-800 font-medium normal-case">Applied</option>
+                        <option value="SCREENING" className="bg-white text-slate-800 font-medium normal-case">Screening</option>
+                        <option value="INTERVIEW" className="bg-white text-slate-800 font-medium normal-case">Interview</option>
+                        <option value="OFFER" className="bg-white text-slate-800 font-medium normal-case">Offer</option>
+                        <option value="ACCEPTED" className="bg-white text-slate-800 font-medium normal-case">Accepted</option>
+                        <option value="REJECTED" className="bg-white text-slate-800 font-medium normal-case">Rejected</option>
+                        <option value="WITHDRAWN" className="bg-white text-slate-800 font-medium normal-case">Withdrawn</option>
+                      </select>
+                      <span className="pointer-events-none absolute right-1.5 text-current opacity-60">
+                        <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      </span>
+                    </div>
                   </td>
                   <td className="py-3 px-4 text-slate-600 text-[11px]">
                     <PlatformBadge source={app.job.source} size="xs" />

@@ -4,13 +4,15 @@ import { KanbanColumn } from './KanbanColumn';
 import { useApplicationsQuery, useUpdateStatusMutation } from '../../hooks/useApplications';
 import ApplicationDetailsModal from '../applications/ApplicationDetailsModal';
 
-const COLUMNS: { title: string; status: ApplicationStatus; badgeColor: string }[] = [
-  { title: 'Saved', status: 'SAVED', badgeColor: 'bg-slate-400' },
-  { title: 'Applied', status: 'APPLIED', badgeColor: 'bg-blue-500' },
-  { title: 'Screening', status: 'SCREENING', badgeColor: 'bg-amber-500' },
-  { title: 'Interview', status: 'INTERVIEW', badgeColor: 'bg-purple-500' },
-  { title: 'Offer', status: 'OFFER', badgeColor: 'bg-emerald-500' },
-  { title: 'Rejected', status: 'REJECTED', badgeColor: 'bg-rose-500' },
+const COLUMNS: { title: string; status: ApplicationStatus }[] = [
+  { title: 'Saved', status: 'SAVED' },
+  { title: 'Applied', status: 'APPLIED' },
+  { title: 'Screening', status: 'SCREENING' },
+  { title: 'Interview', status: 'INTERVIEW' },
+  { title: 'Offer', status: 'OFFER' },
+  { title: 'Accepted', status: 'ACCEPTED' },
+  { title: 'Rejected', status: 'REJECTED' },
+  { title: 'Withdrawn', status: 'WITHDRAWN' },
 ];
 
 export const KanbanBoard: React.FC = () => {
@@ -39,7 +41,6 @@ export const KanbanBoard: React.FC = () => {
           key={col.status}
           title={col.title}
           status={col.status}
-          badgeColor={col.badgeColor}
           applications={applications.filter((a) => a.status === col.status)}
           onSelect={setSelectedApp}
           onStatusChange={handleStatusChange}

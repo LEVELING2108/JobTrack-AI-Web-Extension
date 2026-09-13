@@ -1,32 +1,31 @@
 import React from 'react';
 import { Application, ApplicationStatus } from '../../types';
 import { KanbanCard } from './KanbanCard';
+import StageBadge from '../common/StageBadge';
 
 interface KanbanColumnProps {
-  title: string;
+  title?: string;
   status: ApplicationStatus;
   applications: Application[];
-  badgeColor: string;
+  badgeColor?: string;
   onSelect: (app: Application) => void;
   onStatusChange: (id: number, status: ApplicationStatus) => void;
 }
 
 export const KanbanColumn: React.FC<KanbanColumnProps> = ({
-  title,
+  status,
   applications,
-  badgeColor,
   onSelect,
   onStatusChange,
 }) => {
   return (
-    <div className="flex-1 min-w-[260px] bg-slate-100/70 border border-slate-200/80 rounded-xl p-3 flex flex-col max-h-[calc(100vh-180px)]">
+    <div className="flex-1 min-w-[270px] bg-slate-100/70 border border-slate-200/80 rounded-xl p-3 flex flex-col max-h-[calc(100vh-180px)] shadow-2xs">
       {/* Column Header */}
-      <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
-        <div className="flex items-center gap-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${badgeColor}`} />
-          <h3 className="font-bold text-xs text-slate-800">{title}</h3>
+      <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-200/90">
+        <div className="flex items-center gap-1.5">
+          <StageBadge status={status} size="sm" />
         </div>
-        <span className="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-full text-[10px] font-bold">
+        <span className="bg-white border border-slate-200 text-slate-700 px-2 py-0.5 rounded-full text-[10px] font-extrabold shadow-2xs">
           {applications.length}
         </span>
       </div>

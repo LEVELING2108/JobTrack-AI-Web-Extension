@@ -25,13 +25,7 @@ import { apiService } from '../services/apiService';
 import { syncService } from '../services/syncService';
 import BrandLogo from '../components/BrandLogo';
 import PlatformBadge from '../components/PlatformBadge';
-
-const PRIMARY_STAGES: { value: ApplicationStatus; label: string; color: string; activeColor: string }[] = [
-  { value: 'SAVED', label: 'Saved', color: 'text-indigo-600 bg-indigo-50 border-indigo-200', activeColor: 'bg-indigo-600 text-white border-indigo-600 shadow-xs' },
-  { value: 'APPLIED', label: 'Applied', color: 'text-blue-600 bg-blue-50 border-blue-200', activeColor: 'bg-blue-600 text-white border-blue-600 shadow-xs' },
-  { value: 'INTERVIEW', label: 'Interview', color: 'text-purple-600 bg-purple-50 border-purple-200', activeColor: 'bg-purple-600 text-white border-purple-600 shadow-xs' },
-  { value: 'OFFER', label: 'Offer', color: 'text-emerald-600 bg-emerald-50 border-emerald-200', activeColor: 'bg-emerald-600 text-white border-emerald-600 shadow-xs' },
-];
+import StageBadge, { STAGE_CONFIG, StageIcon } from '../components/StageBadge';
 
 export default function Popup() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -731,42 +725,49 @@ export default function Popup() {
 
               {/* Quick Primary Stage Pills */}
               <div className="grid grid-cols-4 gap-1.5">
-                {PRIMARY_STAGES.map((s) => (
-                  <button
-                    key={s.value}
-                    type="button"
-                    onClick={() => setStatus(s.value)}
-                    className={`py-1.5 px-2 rounded-xl text-[11px] font-bold border transition-all text-center ${
-                      status === s.value ? s.activeColor : `${s.color} hover:opacity-90`
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
+                {(['SAVED', 'APPLIED', 'INTERVIEW', 'OFFER'] as ApplicationStatus[]).map((st) => {
+                  const cfg = STAGE_CONFIG[st];
+                  const isActive = status === st;
+                  return (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => setStatus(st)}
+                      className={`py-1.5 px-1 rounded-xl text-[11px] font-bold border transition-all flex items-center justify-center gap-1 text-center shadow-2xs ${
+                        isActive
+                          ? cfg.solidBg
+                          : `${cfg.bg} ${cfg.text} ${cfg.border} hover:opacity-90`
+                      }`}
+                    >
+                      <StageIcon status={st} className="w-3 h-3 shrink-0" />
+                      <span>{cfg.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Extended Stages Dropdown */}
               {showAllStages && (
                 <div className="grid grid-cols-2 gap-1.5 mt-1 animate-in fade-in">
-                  {[
-                    { value: 'SCREENING', label: 'Screening' },
-                    { value: 'ACCEPTED', label: 'Accepted' },
-                    { value: 'REJECTED', label: 'Rejected' },
-                    { value: 'WITHDRAWN', label: 'Withdrawn' },
-                  ].map((s) => (
-                    <button
-                      key={s.value}
-                      type="button"
-                      onClick={() => setStatus(s.value as ApplicationStatus)}
-                      className={`py-1 px-2.5 rounded-lg text-[10px] font-semibold border transition-all text-center ${
-                        status === s.value
-                          ? 'bg-slate-800 text-white border-slate-800 shadow-2xs'
-                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
+                  {(['SCREENING', 'ACCEPTED', 'REJECTED', 'WITHDRAWN'] as ApplicationStatus[]).map((st) => {
+                    const cfg = STAGE_CONFIG[st];
+                    const isActive = status === st;
+                    return (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => setStatus(st)}
+                        className={`py-1.5 px-2 rounded-xl text-[10px] font-bold border transition-all flex items-center justify-center gap-1.5 text-center shadow-2xs ${
+                          isActive
+                            ? cfg.solidBg
+                            : `${cfg.bg} ${cfg.text} ${cfg.border} hover:opacity-90`
+                        }`}
+                      >
+                        <StageIcon status={st} className="w-3 h-3 shrink-0" />
+                        <span>{cfg.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -790,9 +791,10 @@ export default function Popup() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Saved to Your Pipeline Successfully!</span>
                 </div>
-                <p className="text-[11px] text-emerald-800 font-medium">
-                  The application is now stored in PostgreSQL under the <span className="font-bold">{status}</span> stage.
-                </p>
+                <div className="text-[11px] text-emerald-800 font-medium flex items-center gap-1.5">
+                  <span>Saved to PostgreSQL under</span>
+                  <StageBadge status={status} size="xs" />
+                </div>
                 <button
                   type="button"
                   onClick={() => handleOpenDashboard('/kanban')}
