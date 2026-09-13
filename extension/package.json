@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "package": "npm run build && node -e \"const fs=require('fs'); if(!fs.existsSync('release')) fs.mkdirSync('release'); const {execSync}=require('child_process'); execSync('tar -a -c -f release/jobtrack-extension.zip -C dist .'); console.log('Packaged: release/jobtrack-extension.zip');\"",
     "preview": "vite preview",
     "test": "tsx --test src/**/*.test.ts"
   },
