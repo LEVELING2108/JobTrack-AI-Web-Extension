@@ -1,0 +1,42 @@
+name: Build & Package Chrome Extension Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: extension/package-lock.json
+
+      - name: Install Extension Dependencies
+        working-directory: ./extension
+        run: npm ci
+
+      - name: Build and Package Extension ZIP
+        working-directory: ./extension
+        run: npm run package
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: extension/release/jobtrack-extension.zip
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
