@@ -30,6 +30,19 @@
 
 ---
 
+## 💻 Tech Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Browser Extension** | Chrome Manifest V3, TypeScript, React 18, Tailwind CSS, Vite |
+| **Web Dashboard** | React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, DnD Kit (Kanban) |
+| **Backend REST API** | Java 21 LTS, Spring Boot 3.x, Spring Security (Stateless JWT), Spring Data JPA |
+| **Database & Storage** | PostgreSQL 16 (Production/Docker), H2 Database (Zero-config local fallback) |
+| **AI & Heuristics** | Google Gemini API (LLM analysis) & Integrated Rule-Based Match Scoring Engine |
+| **DevOps & Cloud** | Docker, Docker Compose, Nginx, GitHub Actions (CI/CD), Antideploy Cloud |
+
+---
+
 ## 🛠️ Local Setup & Quick Start
 
 ### Prerequisites
