@@ -33,7 +33,7 @@
   },
   "include": [
     "src",
-    "manifest.json"
+    "public/manifest.json"
   ],
   "exclude": [
     "**/*.test.ts"

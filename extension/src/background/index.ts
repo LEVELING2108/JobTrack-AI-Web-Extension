@@ -1,8 +1,6 @@
 // JobTrack Background Service Worker (Manifest V3)
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('JobTrack Chrome Extension installed.');
-
   // Create context menu for quick capture
   if (chrome.contextMenus) {
     chrome.contextMenus.create({
@@ -16,8 +14,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // Handle context menu clicks
 chrome.contextMenus?.onClicked.addListener((info, _tab) => {
   if (info.menuItemId === 'jobtrack-capture-selection' && info.selectionText) {
-    console.log('Captured selection:', info.selectionText);
-    // In future versions, this can pre-populate a quick note
+    // Selection captured for quick notes
   }
 });
 
