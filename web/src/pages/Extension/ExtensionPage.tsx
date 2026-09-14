@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Download, Copy, Check, Puzzle, Sparkles, FolderArchive, ToggleRight, ArrowLeft, ExternalLink, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BrandLogo from '../../components/common/BrandLogo';
-import InstallationVideoDemo from '../../components/common/InstallationVideoDemo';
 
 export default function ExtensionPage() {
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -73,23 +72,6 @@ export default function ExtensionPage() {
               GitHub Releases
             </a>
           </div>
-        </div>
-
-        {/* Interactive Video Demonstration */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-indigo-600" />
-                Visual Installation Walkthrough
-              </h2>
-              <p className="text-xs text-slate-500">Watch the 15-second simulation on how to install and enable Developer mode</p>
-            </div>
-            <span className="text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full">
-              Chrome & Chromium
-            </span>
-          </div>
-          <InstallationVideoDemo />
         </div>
 
         {/* Installation Instructions Card */}
