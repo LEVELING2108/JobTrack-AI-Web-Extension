@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { X, Download, Copy, Check, ExternalLink, Puzzle, FolderArchive, ToggleRight, Sparkles, Film } from 'lucide-react';
-import InstallationVideoDemo from './InstallationVideoDemo';
+import { X, Download, Copy, Check, ExternalLink, Puzzle, FolderArchive, ToggleRight, Sparkles } from 'lucide-react';
 
 interface DownloadExtensionModalProps {
   isOpen: boolean;
@@ -9,7 +8,6 @@ interface DownloadExtensionModalProps {
 
 export default function DownloadExtensionModal({ isOpen, onClose }: DownloadExtensionModalProps) {
   const [copiedUrl, setCopiedUrl] = useState(false);
-  const [showVideoDemo, setShowVideoDemo] = useState(false);
 
   if (!isOpen) return null;
 
@@ -72,25 +70,13 @@ export default function DownloadExtensionModal({ isOpen, onClose }: DownloadExte
             </a>
           </div>
 
-          {/* Installation Section Header with Video Toggle */}
+          {/* Installation Section Header */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                {showVideoDemo ? 'Visual Walkthrough' : '3-Step Installation Guide'}
-              </h4>
-              <button
-                onClick={() => setShowVideoDemo(!showVideoDemo)}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 hover:underline bg-indigo-50 px-2.5 py-1 rounded-md transition"
-              >
-                <Film className="w-3.5 h-3.5" />
-                {showVideoDemo ? 'Show Text Guide' : 'Watch Video Demo'}
-              </button>
-            </div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+              3-Step Installation Guide
+            </h4>
 
-            {showVideoDemo ? (
-              <InstallationVideoDemo />
-            ) : (
-              <div className="space-y-3">
+            <div className="space-y-3">
               {/* Step 1 */}
               <div className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/70">
                 <div className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
@@ -155,7 +141,6 @@ export default function DownloadExtensionModal({ isOpen, onClose }: DownloadExte
                 </div>
               </div>
             </div>
-            )}
           </div>
         </div>
 

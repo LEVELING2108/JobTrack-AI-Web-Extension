@@ -109,6 +109,17 @@ npm run build
 
 ---
 
+## 🎥 Video Walkthrough (How to Install & Use)
+
+> **Video Guide**: Watch how to download, install the extension, and track job applications in 1 click.
+
+<!-- Add your demo video link or embed here -->
+<!-- Example: [![Watch Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID) -->
+
+*(Video walkthrough placeholder — insert your demo video link or embed here)*
+
+---
+
 ## ⚙️ Environment Variables (Optional)
 
 The repository works out of the box with defaults. To customize:
