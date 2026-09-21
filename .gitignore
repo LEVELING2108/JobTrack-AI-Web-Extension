@@ -84,3 +84,8 @@ chat_history/
 docs/audit/
 docs/SECURITY_AUDIT_REPORT.md
 
+# Agent tooling, rules, and skills (Private / Local only)
+.agents/
+AGENTS.md
+GEMINI.md
+
