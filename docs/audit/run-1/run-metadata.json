@@ -1,0 +1,34 @@
+{
+  "run_id": "run-1",
+  "repo": "JobTrack-AI-Web-Extension",
+  "target": "C:\\\\Users\\\\suman\\\\Downloads\\\\PERSONAL PROJECT\\\\JOBTRACK-AI-WEB-EXTENSION",
+  "source_ref": "18495fc",
+  "profile": "standard",
+  "scope_paths": [
+    "backend",
+    "web",
+    "extension"
+  ],
+  "budget": null,
+  "execution_policy": "sandboxed-source-and-local-only",
+  "selected_companion_files": [
+    "WEB-PROTOCOL-AND-AUTH.md",
+    "CLIENT-SIDE.md",
+    "DATA-ISOLATION-AND-LIFECYCLE.md",
+    "AI-AND-LLM.md",
+    "CLOUD-AND-DEPLOYMENT.md"
+  ],
+  "prior_run_paths": [
+    "docs/SECURITY_AUDIT_REPORT.md"
+  ],
+  "shared_file_owners": {
+    "run-metadata.json": "parent",
+    "architecture.md": "parent",
+    "coverage-ledger.json": "parent",
+    "findings.json": "parent",
+    "REPORT.md": "parent",
+    "FINDINGS-DETAIL.md": "parent",
+    "NEEDS-VALIDATION.md": "parent"
+  },
+  "run_status": "complete"
+}

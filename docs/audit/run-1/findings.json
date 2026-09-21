@@ -1,0 +1,490 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec-01-unverified-google-oauth-token",
+    "title": "Unverified Google OAuth ID Token & Direct Email Fallback (Account Takeover)",
+    "description": "In AuthServiceImpl.java, the server extracts user identity from Google OAuth ID tokens by Base64-decoding the JWT payload without cryptographically verifying Google digital signatures. Additionally, it falls back to an unverified email passed in the client request body. Any unauthenticated caller can impersonate any existing user account by supplying their email.",
+    "root_cause": "AuthServiceImpl decodes Google ID token Base64 payload directly without cryptographic signature verification and falls back to unverified client request parameters.",
+    "intended_behavior": "The server must cryptographically verify Google digital signature on incoming ID tokens against Google public JWKS certs before trusting the email claim, and reject unverified client-supplied emails.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "backend/src/main/java/com/jobtrack/controller/AuthController.java",
+        "line": 42,
+        "scope": "AuthController.loginWithGoogle",
+        "description": "Receives GoogleAuthRequest containing unverified idToken or email from unauthenticated client."
+      },
+      {
+        "kind": "propagation",
+        "file": "backend/src/main/java/com/jobtrack/service/impl/AuthServiceImpl.java",
+        "line": 111,
+        "scope": "AuthServiceImpl.loginWithGoogle",
+        "description": "Splits idToken by period and Base64-decodes payload without signature verification, then falls back to request.getEmail()."
+      },
+      {
+        "kind": "sink",
+        "file": "backend/src/main/java/com/jobtrack/service/impl/AuthServiceImpl.java",
+        "line": 150,
+        "scope": "AuthServiceImpl.loginWithGoogle",
+        "description": "Finds user by unverified email address and issues valid authenticated JWT access and refresh tokens."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "backend/src/main/java/com/jobtrack/service/impl/AuthServiceImpl.java",
+        "line": 115,
+        "description": "Direct Base64 URL decoding of token payload without cryptographic signature verification."
+      },
+      {
+        "file": "backend/src/main/java/com/jobtrack/service/impl/AuthServiceImpl.java",
+        "line": 134,
+        "description": "Fallback to unverified client-provided request.getEmail()."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "Attacker has unauthenticated network access to public /api/v1/auth/google endpoint."
+      },
+      {
+        "kind": "data_state",
+        "description": "Target user account exists in the database."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "External unauthenticated attacker",
+      "payloads": [
+        "POST /api/v1/auth/google with body {\"email\": \"target@example.com\"}"
+      ],
+      "instructions": [
+        "Issue an HTTP POST request to /api/v1/auth/google with a JSON payload specifying target account email.",
+        "Inspect the HTTP response status and body."
+      ],
+      "observed_result": "Backend returns HTTP 200 OK with fully valid access and refresh JWT tokens issued for the victim account without checking Google identity."
+    },
+    "remediation": {
+      "strategy": "Use GoogleIdTokenVerifier from google-api-client or verify against Google JWKS public keys. Reject unverified client request emails.",
+      "code_changes": [
+        {
+          "file_name": "backend/src/main/java/com/jobtrack/service/impl/AuthServiceImpl.java",
+          "fixed_code": "// Enforce GoogleIdTokenVerifier.verify(idTokenString)\n// Remove fallback to request.getEmail()"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "The endpoint is public and the attack requires only the victim email address."
+      },
+      "impact": {
+        "score": "critical",
+        "reason": "Full account takeover granting complete read/write access to user applications, interviews, notes, and profile."
+      },
+      "overall_severity": "critical"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Source code unambiguously confirms unverified payload decoding and request email fallback."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec-02-wildcard-origin-cors",
+    "title": "Wildcard Origin Pattern with Allowed Credentials in CORS Configuration",
+    "description": "In SecurityConfig.java, the CORS configuration enables addAllowedOriginPattern('*') in combination with setAllowCredentials(true). This configuration dynamically echoes any requesting origin in the Access-Control-Allow-Origin response header, allowing third-party web origins to interact with the API with credentials.",
+    "root_cause": "SecurityConfig sets addAllowedOriginPattern('*') alongside setAllowCredentials(true), dynamically echoing any requesting origin.",
+    "intended_behavior": "CORS configuration must only allow explicitly whitelisted trusted domains.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "backend/src/main/java/com/jobtrack/security/SecurityConfig.java",
+        "line": 55,
+        "scope": "SecurityConfig.corsConfigurationSource",
+        "description": "Initializes CorsConfiguration for all endpoints."
+      },
+      {
+        "kind": "propagation",
+        "file": "backend/src/main/java/com/jobtrack/security/SecurityConfig.java",
+        "line": 57,
+        "scope": "SecurityConfig.corsConfigurationSource",
+        "description": "Adds wildcard allowed origin pattern while enabling credentials."
+      },
+      {
+        "kind": "sink",
+        "file": "backend/src/main/java/com/jobtrack/security/SecurityConfig.java",
+        "line": 71,
+        "scope": "SecurityConfig.filterChain",
+        "description": "Applies permissive CORS configuration source to Spring Security filter chain."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "backend/src/main/java/com/jobtrack/security/SecurityConfig.java",
+        "line": 57,
+        "description": "configuration.addAllowedOriginPattern('*');"
+      },
+      {
+        "file": "backend/src/main/java/com/jobtrack/security/SecurityConfig.java",
+        "line": 60,
+        "description": "configuration.setAllowCredentials(true);"
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "network_routing",
+        "description": "Victim user visits an untrusted cross-origin website in a browser context while logged in."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Untrusted third-party web origin",
+      "payloads": [
+        "Cross-origin fetch with Origin header: https://attacker.example.com"
+      ],
+      "instructions": [
+        "Issue cross-origin preflight and GET request from third-party domain.",
+        "Inspect Access-Control-Allow-Origin response header."
+      ],
+      "observed_result": "Backend dynamically reflects Origin header and sets Access-Control-Allow-Credentials: true."
+    },
+    "remediation": {
+      "strategy": "Parse allowedOrigins property from application configuration and set explicit origins using setAllowedOrigins instead of wildcard patterns.",
+      "code_changes": [
+        {
+          "file_name": "backend/src/main/java/com/jobtrack/security/SecurityConfig.java",
+          "fixed_code": "configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(\",\")));"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Requires victim user to visit untrusted site while authenticated session/credentials are accessible."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Allows unauthorized cross-origin access from arbitrary browser contexts."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed in SecurityConfig source code."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec-03-excessive-token-expiration",
+    "title": "Excessive 7-Day Access Token Expiration Without Revocation Mechanism",
+    "description": "In application.yml and JwtTokenProvider.java, access tokens are configured with a 7-day expiration (604,800,000 ms), identical to the refresh token lifespan. Because JWT verification is stateless with no token blacklist or revocation checks, intercepted access tokens remain valid for 168 hours.",
+    "root_cause": "JWT access token lifespan is configured to 7 days (604,800,000 ms) identically to refresh token, without token revocation or blocklist.",
+    "intended_behavior": "Stateless access tokens should have a short lifespan (15 minutes), with renewal mediated via refresh tokens.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "backend/src/main/resources/application.yml",
+        "line": 28,
+        "scope": "application.yml#app.jwt.access-expiration-ms",
+        "description": "Defines 7-day expiration time for access tokens."
+      },
+      {
+        "kind": "propagation",
+        "file": "backend/src/main/java/com/jobtrack/security/JwtTokenProvider.java",
+        "line": 42,
+        "scope": "JwtTokenProvider.generateAccessToken",
+        "description": "Applies configured expiration duration to generated access tokens."
+      },
+      {
+        "kind": "sink",
+        "file": "backend/src/main/java/com/jobtrack/security/JwtAuthenticationFilter.java",
+        "line": 35,
+        "scope": "JwtAuthenticationFilter.doFilterInternal",
+        "description": "Validates unrevoked access tokens for 168 hours."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "backend/src/main/resources/application.yml",
+        "line": 28,
+        "description": "access-expiration-ms: ${JWT_ACCESS_EXPIRATION:604800000}"
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "system_configuration",
+        "description": "Application deployed with default JWT expiration settings."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Network observer or client storage inspector",
+      "payloads": [
+        "Bearer JWT token extracted from client storage"
+      ],
+      "instructions": [
+        "Extract active JWT access token from client localStorage.",
+        "Replay token against protected endpoints days after initial authentication."
+      ],
+      "observed_result": "Token remains fully authorized without revocation capability."
+    },
+    "remediation": {
+      "strategy": "Lower access token lifetime to 15 minutes (900,000 ms) while retaining 7 days exclusively for refresh tokens.",
+      "code_changes": [
+        {
+          "file_name": "backend/src/main/resources/application.yml",
+          "fixed_code": "access-expiration-ms: ${JWT_ACCESS_EXPIRATION:900000} # 15 minutes"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Requires prior interception of token from network or storage."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Excessive validity window without administrative revocation capability."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Verified in application.yml configuration."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec-04-gemini-prompt-injection",
+    "title": "Direct User Input Concatenation into Gemini Prompts (Prompt Injection)",
+    "description": "In GeminiAiServiceImpl.java, external untrusted job descriptions, titles, company names, and candidate resume texts are concatenated directly into generative AI prompts without boundary tags or escaping. Adversarial content in a job posting can manipulate model scoring or instructions.",
+    "root_cause": "Job description, title, company, and resume strings are concatenated directly into LLM prompts without delimiter framing.",
+    "intended_behavior": "External untrusted inputs should be wrapped in explicit XML boundaries with framing instructions.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "backend/src/main/java/com/jobtrack/controller/AiController.java",
+        "line": 44,
+        "scope": "AiController.calculateMatchScore",
+        "description": "Receives user request with job description and resume."
+      },
+      {
+        "kind": "propagation",
+        "file": "backend/src/main/java/com/jobtrack/service/impl/GeminiAiServiceImpl.java",
+        "line": 118,
+        "scope": "GeminiAiServiceImpl.buildMatchScorePrompt",
+        "description": "Appends raw job description directly into StringBuilder prompt."
+      },
+      {
+        "kind": "sink",
+        "file": "backend/src/main/java/com/jobtrack/service/impl/GeminiAiServiceImpl.java",
+        "line": 82,
+        "scope": "GeminiAiServiceImpl.generateContent",
+        "description": "Dispatches unformatted composite prompt to Google Gemini API."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "backend/src/main/java/com/jobtrack/service/impl/GeminiAiServiceImpl.java",
+        "line": 118,
+        "description": "sb.append(\"Job Description:\\n\").append(request.getJobDescription())"
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "data_state",
+        "description": "Job posting contains adversarial prompt injection directives."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Malicious job board poster",
+      "payloads": [
+        "Adversarial prompt text within job description string"
+      ],
+      "instructions": [
+        "Submit job description containing prompt override instructions.",
+        "Inspect response from AI analysis endpoint."
+      ],
+      "observed_result": "LLM processes adversarial directives as prompt instructions rather than data."
+    },
+    "remediation": {
+      "strategy": "Enclose user-controlled content inside structured XML tags (e.g. <job_description>) and instruct model to treat tags strictly as untrusted data.",
+      "code_changes": [
+        {
+          "file_name": "backend/src/main/java/com/jobtrack/service/impl/GeminiAiServiceImpl.java",
+          "fixed_code": "sb.append(\"<job_description>\\n\").append(escapeXml(request.getJobDescription())).append(\"\\n</job_description>\");"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Requires crafting and ingesting adversarial job text."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "Can only manipulate match scores or generated advice text."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Direct string concatenation verified in prompt construction methods."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec-05-extractor-innerhtml-assignment",
+    "title": "Insecure innerHTML Assignment in Generic Extractor",
+    "description": "In genericExtractor.ts, the stripHtml helper method creates a temporary DIV element and assigns raw unparsed HTML from third-party websites directly to tmp.innerHTML to strip tags. This can trigger resource fetches or edge-case execution within the page context.",
+    "root_cause": "genericExtractor.ts creates a temporary DIV and assigns raw HTML to innerHTML to strip tags.",
+    "intended_behavior": "Use DOMParser or regex-based plain text extraction instead of DOM innerHTML assignment.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "extension/src/content/extractors/genericExtractor.ts",
+        "line": 160,
+        "scope": "GenericExtractor.extract",
+        "description": "Receives page DOM elements from third-party websites."
+      },
+      {
+        "kind": "propagation",
+        "file": "extension/src/content/extractors/genericExtractor.ts",
+        "line": 168,
+        "scope": "GenericExtractor.stripHtml",
+        "description": "Passes raw HTML string into stripHtml method."
+      },
+      {
+        "kind": "sink",
+        "file": "extension/src/content/extractors/genericExtractor.ts",
+        "line": 170,
+        "scope": "GenericExtractor.stripHtml",
+        "description": "Assigns unparsed third-party HTML directly to tmp.innerHTML."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "extension/src/content/extractors/genericExtractor.ts",
+        "line": 170,
+        "description": "tmp.innerHTML = html;"
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "data_state",
+        "description": "Scraped third-party page contains crafted HTML payloads."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Hostile third-party web page",
+      "payloads": [
+        "Crafted HTML markup containing embedded elements"
+      ],
+      "instructions": [
+        "Navigate extension content script to page containing crafted markup.",
+        "Trigger GenericExtractor.extract on page content."
+      ],
+      "observed_result": "HTML parsed via browser DOM innerHTML parser within page context."
+    },
+    "remediation": {
+      "strategy": "Replace tmp.innerHTML with new DOMParser().parseFromString(html, 'text/html').body.textContent.",
+      "code_changes": [
+        {
+          "file_name": "extension/src/content/extractors/genericExtractor.ts",
+          "fixed_code": "return new DOMParser().parseFromString(html, 'text/html').body.textContent || '';"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Requires hostile page structure and runs inside content script isolated world."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "Limited to sub-resource parsing or DOM evaluation in isolated context."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed in genericExtractor.ts source code."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec-06-hardcoded-default-jwt-secret",
+    "title": "Hardcoded Default JWT Secret in Configuration",
+    "description": "In application.yml, the app.jwt.secret setting includes a hardcoded development secret as fallback when JWT_SECRET is unset. In production deployments where this environment variable is missing, anyone with repository access could forge valid JWT access tokens.",
+    "root_cause": "application.yml specifies a fallback secret key when JWT_SECRET environment variable is unset.",
+    "intended_behavior": "Production environments must enforce JWT_SECRET presence without known hardcoded defaults.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "backend/src/main/resources/application.yml",
+        "line": 27,
+        "scope": "application.yml#app.jwt.secret",
+        "description": "Defines static fallback secret key."
+      },
+      {
+        "kind": "propagation",
+        "file": "backend/src/main/java/com/jobtrack/security/JwtTokenProvider.java",
+        "line": 35,
+        "scope": "JwtTokenProvider.key",
+        "description": "Initializes HMAC-SHA signing key with configured fallback secret."
+      },
+      {
+        "kind": "sink",
+        "file": "backend/src/main/java/com/jobtrack/security/JwtTokenProvider.java",
+        "line": 60,
+        "scope": "JwtTokenProvider.validateToken",
+        "description": "Validates incoming tokens using predictable key if env var is missing."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "backend/src/main/resources/application.yml",
+        "line": 27,
+        "description": "secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}"
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "system_configuration",
+        "description": "Production deployment launched without specifying JWT_SECRET environment variable."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "External attacker knowing default secret from repository",
+      "payloads": [
+        "JWT token signed with known default HMAC secret"
+      ],
+      "instructions": [
+        "Sign a JWT payload using the default HMAC key.",
+        "Send authenticated request to API when server runs with default config."
+      ],
+      "observed_result": "Backend validates forged token if default fallback secret remains active."
+    },
+    "remediation": {
+      "strategy": "Enforce JWT_SECRET requirement in production and fail initialization if default development secret is detected.",
+      "code_changes": [
+        {
+          "file_name": "backend/src/main/resources/application.yml",
+          "fixed_code": "secret: ${JWT_SECRET}"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Requires operator misconfiguration in production."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Permits arbitrary token forgery and full system access if triggered."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed in application.yml source code."
+    }
+  }
+]

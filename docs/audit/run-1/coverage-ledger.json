@@ -1,0 +1,355 @@
+[
+  {
+    "coverage_id": "backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fcontroller%2FAiController.java%23POST%20%2Fapi%2Fv1%2Fai%2Fmatch-score::backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fservice%2Fimpl%2FGeminiAiServiceImpl.java%23calculateMatchScore::backend::ATTACK-CLASSES.md%23Injection%20and%20parsing",
+    "canonical_refs": {
+      "surface": "backend/src/main/java/com/jobtrack/controller/AiController.java#POST /api/v1/ai/match-score",
+      "boundary": "backend/src/main/java/com/jobtrack/service/impl/GeminiAiServiceImpl.java#calculateMatchScore",
+      "subsystem": "backend",
+      "attack_class": "ATTACK-CLASSES.md#Injection and parsing"
+    },
+    "surface": "AI copilot match score endpoint",
+    "boundary": "LLM prompt assembly boundary",
+    "subsystem": "Backend API",
+    "attack_class": "Injection and parsing",
+    "starting_paths": [
+      "backend/src/main/java/com/jobtrack/controller/AiController.java",
+      "backend/src/main/java/com/jobtrack/service/impl/GeminiAiServiceImpl.java"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection and parsing",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Prompt injection and boundary integrity"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Buffer overflows",
+        "reason": "Java application runtime is memory managed."
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-ai-01",
+    "reviewed_paths": [
+      "backend/src/main/java/com/jobtrack/service/impl/GeminiAiServiceImpl.java"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-ai-01",
+        "reviewed_paths": [
+          "backend/src/main/java/com/jobtrack/service/impl/GeminiAiServiceImpl.java"
+        ],
+        "invariant": "External user and job input must be delimited with structural boundaries before LLM prompt submission.",
+        "method": "source",
+        "result": "Confirmed job description and resume are directly concatenated into prompt string without delimiters or escaping.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec-04-gemini-prompt-injection"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fcontroller%2FApplicationController.java%23GET%20%2Fapi%2Fv1%2Fapplications%2F%7Bid%7D::backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fservice%2Fimpl%2FApplicationServiceImpl.java%23findByIdAndUserId::backend::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "backend/src/main/java/com/jobtrack/controller/ApplicationController.java#GET /api/v1/applications/{id}",
+      "boundary": "backend/src/main/java/com/jobtrack/service/impl/ApplicationServiceImpl.java#findByIdAndUserId",
+      "subsystem": "backend",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "Application details REST endpoint",
+    "boundary": "Multi-tenant resource owner isolation",
+    "subsystem": "Backend API",
+    "attack_class": "Access control",
+    "starting_paths": [
+      "backend/src/main/java/com/jobtrack/controller/ApplicationController.java",
+      "backend/src/main/java/com/jobtrack/service/impl/ApplicationServiceImpl.java"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Multi-tenant data isolation"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "AI-AND-LLM.md#Model extraction",
+        "reason": "Endpoint handles relational database records."
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-tenant-01",
+    "reviewed_paths": [
+      "backend/src/main/java/com/jobtrack/service/impl/ApplicationServiceImpl.java"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-tenant-01",
+        "reviewed_paths": [
+          "backend/src/main/java/com/jobtrack/service/impl/ApplicationServiceImpl.java"
+        ],
+        "invariant": "Users must only access application entities belonging to their authenticated user ID.",
+        "method": "source",
+        "result": "Confirmed robust tenant isolation: repository query strictly enforces findByIdAndUserId(id, user.getId()).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fcontroller%2FAuthController.java%23POST%20%2Fapi%2Fv1%2Fauth%2Fgoogle::backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fservice%2Fimpl%2FAuthServiceImpl.java%23loginWithGoogle::backend::ATTACK-CLASSES.md%23Authentication%20and%20session%20state",
+    "canonical_refs": {
+      "surface": "backend/src/main/java/com/jobtrack/controller/AuthController.java#POST /api/v1/auth/google",
+      "boundary": "backend/src/main/java/com/jobtrack/service/impl/AuthServiceImpl.java#loginWithGoogle",
+      "subsystem": "backend",
+      "attack_class": "ATTACK-CLASSES.md#Authentication and session state"
+    },
+    "surface": "Google OAuth login endpoint",
+    "boundary": "Google ID token signature verification",
+    "subsystem": "Backend API",
+    "attack_class": "Authentication and session state",
+    "starting_paths": [
+      "backend/src/main/java/com/jobtrack/controller/AuthController.java",
+      "backend/src/main/java/com/jobtrack/service/impl/AuthServiceImpl.java"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Authentication and session state",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Authentication and session state"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Cache behavior",
+        "reason": "Authentication responses are non-cacheable."
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-auth-01",
+    "reviewed_paths": [
+      "backend/src/main/java/com/jobtrack/service/impl/AuthServiceImpl.java"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-auth-01",
+        "reviewed_paths": [
+          "backend/src/main/java/com/jobtrack/service/impl/AuthServiceImpl.java"
+        ],
+        "invariant": "Google ID tokens must be cryptographically verified before authenticating a user.",
+        "method": "source",
+        "result": "Confirmed that loginWithGoogle Base64-decodes token payload without signature verification and accepts unverified request email.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec-01-unverified-google-oauth-token"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fsecurity%2FSecurityConfig.java%23corsConfigurationSource::backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fsecurity%2FSecurityConfig.java%23corsConfigurationSource::backend::ATTACK-CLASSES.md%23Cross-origin%20and%20web%20isolation",
+    "canonical_refs": {
+      "surface": "backend/src/main/java/com/jobtrack/security/SecurityConfig.java#corsConfigurationSource",
+      "boundary": "backend/src/main/java/com/jobtrack/security/SecurityConfig.java#corsConfigurationSource",
+      "subsystem": "backend",
+      "attack_class": "ATTACK-CLASSES.md#Cross-origin and web isolation"
+    },
+    "surface": "CORS configuration filter",
+    "boundary": "Cross-origin request authorization",
+    "subsystem": "Backend API",
+    "attack_class": "Cross-origin and web isolation",
+    "starting_paths": [
+      "backend/src/main/java/com/jobtrack/security/SecurityConfig.java"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cross-origin and web isolation",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Cross-origin and web isolation"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "CLIENT-SIDE.md#Extension permissions",
+        "reason": "Backend CORS does not configure extension manifests."
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-cors-01",
+    "reviewed_paths": [
+      "backend/src/main/java/com/jobtrack/security/SecurityConfig.java"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-cors-01",
+        "reviewed_paths": [
+          "backend/src/main/java/com/jobtrack/security/SecurityConfig.java"
+        ],
+        "invariant": "CORS configuration must not combine wildcard origin pattern with credential transmission.",
+        "method": "source",
+        "result": "Confirmed addAllowedOriginPattern('*') is combined with setAllowCredentials(true), echoing arbitrary requesting origins.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec-02-wildcard-origin-cors"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "backend%2Fsrc%2Fmain%2Fresources%2Fapplication.yml%23app.jwt.secret::backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fsecurity%2FJwtTokenProvider.java%23key::backend::ATTACK-CLASSES.md%23Cryptographic%20implementation",
+    "canonical_refs": {
+      "surface": "backend/src/main/resources/application.yml#app.jwt.secret",
+      "boundary": "backend/src/main/java/com/jobtrack/security/JwtTokenProvider.java#key",
+      "subsystem": "backend",
+      "attack_class": "ATTACK-CLASSES.md#Cryptographic implementation"
+    },
+    "surface": "JWT signing secret configuration",
+    "boundary": "Cryptographic key derivation and storage",
+    "subsystem": "Backend API",
+    "attack_class": "Cryptographic implementation",
+    "starting_paths": [
+      "backend/src/main/resources/application.yml",
+      "backend/src/main/java/com/jobtrack/security/JwtTokenProvider.java"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cryptographic implementation",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Cryptographic secrets"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#IPC channels",
+        "reason": "No local IPC channels in backend."
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-crypto-01",
+    "reviewed_paths": [
+      "backend/src/main/resources/application.yml"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-crypto-01",
+        "reviewed_paths": [
+          "backend/src/main/resources/application.yml"
+        ],
+        "invariant": "Cryptographic secrets must not have hardcoded fallback values in repository configuration.",
+        "method": "source",
+        "result": "Confirmed application.yml contains a hardcoded HMAC-SHA secret as fallback when JWT_SECRET env var is omitted.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec-06-hardcoded-default-jwt-secret"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "backend%2Fsrc%2Fmain%2Fresources%2Fapplication.yml%23app.jwt::backend%2Fsrc%2Fmain%2Fjava%2Fcom%2Fjobtrack%2Fsecurity%2FJwtTokenProvider.java%23generateAccessToken::backend::ATTACK-CLASSES.md%23Authentication%20and%20session%20state",
+    "canonical_refs": {
+      "surface": "backend/src/main/resources/application.yml#app.jwt",
+      "boundary": "backend/src/main/java/com/jobtrack/security/JwtTokenProvider.java#generateAccessToken",
+      "subsystem": "backend",
+      "attack_class": "ATTACK-CLASSES.md#Authentication and session state"
+    },
+    "surface": "JWT configuration settings",
+    "boundary": "Access token expiration and revocation lifecycle",
+    "subsystem": "Backend API",
+    "attack_class": "Authentication and session state",
+    "starting_paths": [
+      "backend/src/main/resources/application.yml",
+      "backend/src/main/java/com/jobtrack/security/JwtTokenProvider.java"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Authentication and session state",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Session and token lifecycle"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Cache behavior",
+        "reason": "Tokens are handled in headers, not cache policies."
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-lifecycle-01",
+    "reviewed_paths": [
+      "backend/src/main/resources/application.yml"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-lifecycle-01",
+        "reviewed_paths": [
+          "backend/src/main/resources/application.yml"
+        ],
+        "invariant": "Stateless access tokens should have a short lifespan and be distinct from long-lived refresh tokens.",
+        "method": "source",
+        "result": "Confirmed access token expiration is 7 days (604,800,000 ms), equal to refresh token expiration without revocation registry.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec-03-excessive-token-expiration"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "extension%2Fsrc%2Fcontent%2Fextractors%2FgenericExtractor.ts%23extract::extension%2Fsrc%2Fcontent%2Fextractors%2FgenericExtractor.ts%23stripHtml::extension::ATTACK-CLASSES.md%23Injection%20and%20parsing",
+    "canonical_refs": {
+      "surface": "extension/src/content/extractors/genericExtractor.ts#extract",
+      "boundary": "extension/src/content/extractors/genericExtractor.ts#stripHtml",
+      "subsystem": "extension",
+      "attack_class": "ATTACK-CLASSES.md#Injection and parsing"
+    },
+    "surface": "Generic job page content extractor",
+    "boundary": "DOM HTML sanitization routine",
+    "subsystem": "Chrome Extension",
+    "attack_class": "Injection and parsing",
+    "starting_paths": [
+      "extension/src/content/extractors/genericExtractor.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection and parsing",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#DOM manipulation and XSS"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Container breakouts",
+        "reason": "Extension runs in client browser."
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-ext-01",
+    "reviewed_paths": [
+      "extension/src/content/extractors/genericExtractor.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-ext-01",
+        "reviewed_paths": [
+          "extension/src/content/extractors/genericExtractor.ts"
+        ],
+        "invariant": "HTML parsing for text extraction must not assign unvalidated markup to DOM innerHTML.",
+        "method": "source",
+        "result": "Confirmed document.createElement('DIV').innerHTML = html is used to strip HTML tags from third-party page content.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec-05-extractor-innerhtml-assignment"
+    ],
+    "unresolved": []
+  }
+]
