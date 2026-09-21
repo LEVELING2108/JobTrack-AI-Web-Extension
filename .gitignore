@@ -79,3 +79,14 @@ CONVERSATION_HISTORY.md
 CHAT_HISTORY.md
 chat_history/
 *.chat.md
+
+# Security audit reports & confidential vulnerability findings (Private / Local only)
+docs/audit/
+docs/SECURITY_AUDIT_REPORT.md
+
+# Agent tooling, rules, and skills (Private / Local only)
+.agents/
+AGENTS.md
+GEMINI.md
+
+
