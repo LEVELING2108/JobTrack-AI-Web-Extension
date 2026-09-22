@@ -166,8 +166,11 @@ export class GenericExtractor implements JobExtractor {
   }
 
   private stripHtml(html: string): string {
-    const tmp = document.createElement('DIV');
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || '';
+    try {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      return (doc.body.textContent || '').trim();
+    } catch {
+      return html.replace(/<[^>]*>?/gm, '').trim();
+    }
   }
 }

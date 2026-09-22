@@ -35,6 +35,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("DUPLICATE_RESOURCE", ex.getMessage()));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
+        log.warn("Unauthorized request [{}]: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.fail("UNAUTHORIZED", ex.getMessage()));
+    }
+
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnauthorizedAccess(UnauthorizedAccessException ex, HttpServletRequest request) {
         log.warn("Forbidden access attempt [{}]: {}", request.getRequestURI(), ex.getMessage());
