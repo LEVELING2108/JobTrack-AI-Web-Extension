@@ -87,6 +87,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(authData.accessToken);
       setUser(authData.user);
       localStorage.setItem('jobtrack_access_token', authData.accessToken);
+      if (authData.refreshToken) {
+        localStorage.setItem('jobtrack_refresh_token', authData.refreshToken);
+      }
       localStorage.setItem('jobtrack_user', JSON.stringify(authData.user));
     } else {
       throw new Error(response.data.error?.message || 'Login failed');
@@ -101,6 +104,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(authData.accessToken);
       setUser(authData.user);
       localStorage.setItem('jobtrack_access_token', authData.accessToken);
+      if (authData.refreshToken) {
+        localStorage.setItem('jobtrack_refresh_token', authData.refreshToken);
+      }
       localStorage.setItem('jobtrack_user', JSON.stringify(authData.user));
     } else {
       throw new Error(response.data.error?.message || 'Google authentication failed');
@@ -119,6 +125,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(authData.accessToken);
       setUser(authData.user);
       localStorage.setItem('jobtrack_access_token', authData.accessToken);
+      if (authData.refreshToken) {
+        localStorage.setItem('jobtrack_refresh_token', authData.refreshToken);
+      }
       localStorage.setItem('jobtrack_user', JSON.stringify(authData.user));
     } else {
       throw new Error(response.data.error?.message || 'Registration failed');
@@ -129,6 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     setUser(null);
     localStorage.removeItem('jobtrack_access_token');
+    localStorage.removeItem('jobtrack_refresh_token');
     localStorage.removeItem('jobtrack_user');
   };
 

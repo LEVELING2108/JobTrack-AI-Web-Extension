@@ -13,8 +13,11 @@ import com.jobtrack.enums.OAuthProvider;
 import com.jobtrack.exception.BadRequestException;
 import com.jobtrack.exception.DuplicateResourceException;
 import com.jobtrack.exception.ResourceNotFoundException;
+import com.jobtrack.exception.UnauthorizedException;
 import com.jobtrack.mapper.UserMapper;
 import com.jobtrack.repository.UserRepository;
+import com.jobtrack.security.GoogleTokenPayload;
+import com.jobtrack.security.GoogleTokenVerifierService;
 import com.jobtrack.security.JwtTokenProvider;
 import com.jobtrack.security.UserPrincipal;
 import com.jobtrack.service.AuthService;
@@ -28,8 +31,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Optional;
 
 @Slf4j
@@ -42,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final UserMapper userMapper;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final GoogleTokenVerifierService googleTokenVerifierService;
 
     @Override
     @Transactional
@@ -103,46 +104,19 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse loginWithGoogle(GoogleAuthRequest request) {
-        String email = null;
-        String name = null;
-        String sub = null;
-
-        // Try decoding JWT payload from Google ID Token
-        if (request.getIdToken() != null && request.getIdToken().contains(".")) {
-            try {
-                String[] parts = request.getIdToken().split("\\.");
-                if (parts.length >= 2) {
-                    byte[] decoded = Base64.getUrlDecoder().decode(parts[1]);
-                    JsonNode payload = objectMapper.readTree(new String(decoded, StandardCharsets.UTF_8));
-
-                    if (payload.has("email")) {
-                        email = payload.get("email").asText();
-                    }
-                    if (payload.has("name")) {
-                        name = payload.get("name").asText();
-                    }
-                    if (payload.has("sub")) {
-                        sub = payload.get("sub").asText();
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("Failed to parse Google ID Token payload directly: {}", e.getMessage());
-            }
+        if (request.getIdToken() == null || request.getIdToken().isBlank()) {
+            throw new BadRequestException("Google ID token is required.");
         }
 
-        // Fallback to explicit request fields if client passed them
-        if (email == null && request.getEmail() != null) {
-            email = request.getEmail();
-        }
-        if (name == null && request.getName() != null) {
-            name = request.getName();
+        GoogleTokenPayload payload = googleTokenVerifierService.verify(request.getIdToken());
+        if (payload == null || payload.email() == null || !payload.emailVerified()) {
+            throw new UnauthorizedException("Google identity verification failed or email is unverified.");
         }
 
-        if (email == null || email.isBlank()) {
-            throw new BadRequestException("Unable to extract verified email from Google identity.");
-        }
+        String normalizedEmail = payload.email().trim().toLowerCase();
+        String name = payload.name();
+        String sub = payload.sub();
 
-        String normalizedEmail = email.trim().toLowerCase();
         if (name == null || name.isBlank()) {
             name = normalizedEmail.split("@")[0];
         }

@@ -9,6 +9,10 @@ import com.jobtrack.entity.User;
 import com.jobtrack.enums.OAuthProvider;
 import com.jobtrack.mapper.UserMapper;
 import com.jobtrack.repository.UserRepository;
+import com.jobtrack.exception.BadRequestException;
+import com.jobtrack.exception.UnauthorizedException;
+import com.jobtrack.security.GoogleTokenPayload;
+import com.jobtrack.security.GoogleTokenVerifierService;
 import com.jobtrack.security.JwtTokenProvider;
 import com.jobtrack.security.UserPrincipal;
 import com.jobtrack.service.impl.AuthServiceImpl;
@@ -28,6 +32,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +53,9 @@ class AuthServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private GoogleTokenVerifierService googleTokenVerifierService;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -124,19 +132,27 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("Should authenticate via Google OAuth and auto-create user if not existing")
+    @DisplayName("Should authenticate via Google OAuth and auto-create user when token is verified")
     void testGoogleLogin_AutoRegister() {
         GoogleAuthRequest request = GoogleAuthRequest.builder()
                 .idToken("mock_google_id_token")
-                .email("google.user@example.com")
-                .name("Google User")
                 .build();
+
+        when(googleTokenVerifierService.verify("mock_google_id_token")).thenReturn(
+                GoogleTokenPayload.builder()
+                        .email("google.user@example.com")
+                        .name("Google User")
+                        .sub("google_sub_123")
+                        .emailVerified(true)
+                        .build()
+        );
 
         User googleUser = User.builder()
                 .id(2L)
                 .name("Google User")
                 .email("google.user@example.com")
                 .oauthProvider(OAuthProvider.GOOGLE)
+                .oauthId("google_sub_123")
                 .build();
 
         UserProfileResponse googleProfile = UserProfileResponse.builder()
@@ -157,5 +173,46 @@ class AuthServiceTest {
         assertNotNull(response);
         assertEquals("google_access_token", response.getAccessToken());
         assertEquals("google.user@example.com", response.getUser().getEmail());
+    }
+
+    @Test
+    @DisplayName("Should reject Google login when ID token signature verification fails (SEC-01)")
+    void testGoogleLogin_InvalidToken_ThrowsUnauthorized() {
+        GoogleAuthRequest request = GoogleAuthRequest.builder()
+                .idToken("forged_or_invalid_id_token")
+                .email("victim@example.com")
+                .build();
+
+        when(googleTokenVerifierService.verify("forged_or_invalid_id_token"))
+                .thenThrow(new UnauthorizedException("Invalid Google token issuer."));
+
+        assertThrows(UnauthorizedException.class, () -> authService.loginWithGoogle(request));
+    }
+
+    @Test
+    @DisplayName("Should reject Google login when email is not verified by Google (SEC-01)")
+    void testGoogleLogin_UnverifiedEmail_ThrowsUnauthorized() {
+        GoogleAuthRequest request = GoogleAuthRequest.builder()
+                .idToken("valid_token_unverified_email")
+                .build();
+
+        when(googleTokenVerifierService.verify("valid_token_unverified_email")).thenReturn(
+                GoogleTokenPayload.builder()
+                        .email("unverified@example.com")
+                        .emailVerified(false)
+                        .build()
+        );
+
+        assertThrows(UnauthorizedException.class, () -> authService.loginWithGoogle(request));
+    }
+
+    @Test
+    @DisplayName("Should reject Google login when ID token is missing (SEC-01)")
+    void testGoogleLogin_MissingToken_ThrowsBadRequest() {
+        GoogleAuthRequest request = GoogleAuthRequest.builder()
+                .email("attacker@example.com")
+                .build();
+
+        assertThrows(BadRequestException.class, () -> authService.loginWithGoogle(request));
     }
 }
