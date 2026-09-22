@@ -77,60 +77,87 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', {
-      email: email.trim().toLowerCase(),
-      password,
-    });
+    try {
+      const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', {
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    if (response.data.success && response.data.data) {
-      const authData = response.data.data;
-      setToken(authData.accessToken);
-      setUser(authData.user);
-      localStorage.setItem('jobtrack_access_token', authData.accessToken);
-      if (authData.refreshToken) {
-        localStorage.setItem('jobtrack_refresh_token', authData.refreshToken);
+      if (response.data.success && response.data.data) {
+        const authData = response.data.data;
+        setToken(authData.accessToken);
+        setUser(authData.user);
+        localStorage.setItem('jobtrack_access_token', authData.accessToken);
+        if (authData.refreshToken) {
+          localStorage.setItem('jobtrack_refresh_token', authData.refreshToken);
+        }
+        localStorage.setItem('jobtrack_user', JSON.stringify(authData.user));
+      } else {
+        throw new Error(response.data.error?.message || response.data.message || 'Login failed');
       }
-      localStorage.setItem('jobtrack_user', JSON.stringify(authData.user));
-    } else {
-      throw new Error(response.data.error?.message || 'Login failed');
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        err.message ||
+        'Login failed';
+      throw new Error(msg);
     }
   };
 
   const loginWithGoogle = async (payload: { idToken: string; email?: string; name?: string; avatarUrl?: string }) => {
-    const response = await api.post<ApiResponse<AuthResponse>>('/auth/google', payload);
+    try {
+      const response = await api.post<ApiResponse<AuthResponse>>('/auth/google', payload);
 
-    if (response.data.success && response.data.data) {
-      const authData = response.data.data;
-      setToken(authData.accessToken);
-      setUser(authData.user);
-      localStorage.setItem('jobtrack_access_token', authData.accessToken);
-      if (authData.refreshToken) {
-        localStorage.setItem('jobtrack_refresh_token', authData.refreshToken);
+      if (response.data.success && response.data.data) {
+        const authData = response.data.data;
+        setToken(authData.accessToken);
+        setUser(authData.user);
+        localStorage.setItem('jobtrack_access_token', authData.accessToken);
+        if (authData.refreshToken) {
+          localStorage.setItem('jobtrack_refresh_token', authData.refreshToken);
+        }
+        localStorage.setItem('jobtrack_user', JSON.stringify(authData.user));
+      } else {
+        throw new Error(response.data.error?.message || response.data.message || 'Google authentication failed');
       }
-      localStorage.setItem('jobtrack_user', JSON.stringify(authData.user));
-    } else {
-      throw new Error(response.data.error?.message || 'Google authentication failed');
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        err.message ||
+        'Google authentication failed';
+      throw new Error(msg);
     }
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const response = await api.post<ApiResponse<AuthResponse>>('/auth/register', {
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      password,
-    });
+    try {
+      const response = await api.post<ApiResponse<AuthResponse>>('/auth/register', {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    if (response.data.success && response.data.data) {
-      const authData = response.data.data;
-      setToken(authData.accessToken);
-      setUser(authData.user);
-      localStorage.setItem('jobtrack_access_token', authData.accessToken);
-      if (authData.refreshToken) {
-        localStorage.setItem('jobtrack_refresh_token', authData.refreshToken);
+      if (response.data.success && response.data.data) {
+        const authData = response.data.data;
+        setToken(authData.accessToken);
+        setUser(authData.user);
+        localStorage.setItem('jobtrack_access_token', authData.accessToken);
+        if (authData.refreshToken) {
+          localStorage.setItem('jobtrack_refresh_token', authData.refreshToken);
+        }
+        localStorage.setItem('jobtrack_user', JSON.stringify(authData.user));
+      } else {
+        throw new Error(response.data.error?.message || response.data.message || 'Registration failed');
       }
-      localStorage.setItem('jobtrack_user', JSON.stringify(authData.user));
-    } else {
-      throw new Error(response.data.error?.message || 'Registration failed');
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        err.message ||
+        'Registration failed';
+      throw new Error(msg);
     }
   };
 
